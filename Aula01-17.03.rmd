@@ -1,0 +1,18 @@
+---
+title: "Análise Multivariada - 17/03"
+output: html_notebook
+---
+
+# Introdução
+
+Um exemplo de V.A. multivariada que já foi trabalhada é a Normal Multivariada, cujos paramêtros são um vetor de médias e uma matriz de covariâncias. Um vetor (ou matriz, caso $p>1$) aleatório pode ser representado como:
+
+$$
+X_{n\text{x}p}=\begin{bmatrix}
+ X'_1 \\ X'_2 \\ \vdots \\ X'_n
+ \end{bmatrix}
+$$
+
+Para análise multivariada, a notação e entendimento de matrizes é de extrema importância. O livro a ser usado como referência principal será o *Applied Multivariate Statistical Analysis*, Richard A Johnson (capítulo 2) e *An introduction to applied multivariate analysis in R*, Everitt & Hothorn e *An introduction to statistical learning*, Gareth James (https://www.statlearning.com/). É bom também pesquisar sobre visualização multivariada, quais técnicas podem ser usadas para visualizar dados multidimensionais.
+
+https://storage.blucher.com.br/book/pdf_preview/PDF_metodos.pdf
