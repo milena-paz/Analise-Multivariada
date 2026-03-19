@@ -1,9 +1,21 @@
 ---
-title: "Análise Multivariada - 17/03"
+title: "Análise Multivariada - 17/03 e 19/03"
 output: html_notebook
 ---
 
 # Introdução
+
+ O livro a ser usado como referência principal será o *Applied Multivariate Statistical Analysis*, Richard A Johnson (capítulo 2) e *An introduction to applied multivariate analysis in R*, Everitt & Hothorn e *An introduction to statistical learning*, Gareth James (https://www.statlearning.com/). É bom também pesquisar sobre visualização multivariada, quais técnicas podem ser usadas para visualizar dados multidimensionais.
+
+https://storage.blucher.com.br/book/pdf_preview/PDF_metodos.pdf
+
+#### Definição: Objeto
+
+Entidades das quais são tomadas medidas referentes a certas variáveis de interesse. Exemplo: itens, pessoas, organizações.
+
+#### Definição: Variável
+
+Aspectos dos objetos que são medidos.
 
 Um exemplo de V.A. multivariada que já foi trabalhada é a Normal Multivariada, cujos paramêtros são um vetor de médias e uma matriz de covariâncias. Um vetor (ou matriz, caso $p>1$) aleatório pode ser representado como:
 
@@ -13,6 +25,53 @@ X_{n\text{x}p}=\begin{bmatrix}
  \end{bmatrix}
 $$
 
-Para análise multivariada, a notação e entendimento de matrizes é de extrema importância. O livro a ser usado como referência principal será o *Applied Multivariate Statistical Analysis*, Richard A Johnson (capítulo 2) e *An introduction to applied multivariate analysis in R*, Everitt & Hothorn e *An introduction to statistical learning*, Gareth James (https://www.statlearning.com/). É bom também pesquisar sobre visualização multivariada, quais técnicas podem ser usadas para visualizar dados multidimensionais.
+Para análise multivariada, a notação e entendimento de matrizes é de extrema importância.
 
-https://storage.blucher.com.br/book/pdf_preview/PDF_metodos.pdf
+A matriz resultante das linhas correspondentes aos objetos e colunas às variáveis.
+
+# Técnicas exploratórias
+
+* Análise de componentes principais
+
+Trata-se da redução do número de variáveis a um número menor de índices, ou seja: partir de $p$ variáveis para $k<p$ componentes. Os componentes principais são combinações lineares das variáveis originais. Pode ocorrer que duas ou mais componentes forneçam um bom resumo de todas as variáveis originais.
+
+
+* Análise fatorial
+
+Estudar a variação em uma quantidade de variáveis originais, usando um número menor de fatores (variáveis índices). Assume-se que cada variável original pode ser expressa como uma **combinação linear** dos fatores mais um termo residual (que reflete quanto a variável é dependente das outras variáveis).
+
+* Análise discriminante
+
+Separação em diferentes grupos com base nas medidas disponíveis. Busca-se encontrar combinações lineares convenientes das variáveis originais para atingir o objetivo desejado.
+
+* Análise de agrupamento
+
+Identificação de grupos de objetos similares.
+
+* Escalonamento multidimensional
+
+Mapeamento com distância entre objetos, mostrando como estão relacionados. A visualização é possível até 3 dimensões, serve como alternativa à análise de agrupamento.
+
+* Métodos de Ordenação
+
+Produção de eixos nos quais um conjunto de objetos de interesse pode ser representado.
+
+* Análise de correlação canônica
+
+As variáveis são divididas em dois grupos e o interesse está no relacionamento entre elas.
+
+* Análise de correspondência
+
+Dados sobre a abundância de cada uma das várias características para cada elemento de um conjunto de objetos.
+
+# Usos das técnicas multivariadas
+
+  Construção de índices: Sintetização em uma única variável a informação de todas as variáveis que foram medidas sobre o fenômeno.
+
+  Classificação e discriminação: Busca-se a divisão de conjuntos de dados em grupos de modo que os quais tenham coesão interna e sejam heterogêneos entre si.
+
+  Inferência estatística: Comparação de grupos em relação às médias de
+variáveis medidas conjuntamente.
+
+  Regressão multivariada: Análise do efeito de fatores externos não controlados nas
+variáveis que são monitoras regularmente.
