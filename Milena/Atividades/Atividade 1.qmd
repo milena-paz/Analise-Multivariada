@@ -1,0 +1,122 @@
+---
+title: "Atividade 1 - Álgebra Matricial"
+author: "Milena Paz Freitas"
+subtitle: "Análise Multivariada - 2026.1"
+format: html
+page-layout: full
+lang: pt-BR
+title-block-banner: true
+title-block-style: manuscript
+embed-resources: true
+editor: source
+theme: sandstone
+bibliography: "ref.bib"
+callout-appearance: "minimal"
+toc: true
+toc-expand: true
+csl: abnt.csl
+---
+
+::: {.hidden}
+$$
+\newcommand{\inv}{^{-1}}
+\newcommand{\bm}[1]{\mathbf{#1}}
+$$
+:::
+
+Este documento apresenta as resoluções dos
+exercícios propostos, em grande parte do livro de @johnson2002, *Applied multivariate statistical analysis* - que foram realizados com o objetivo de compreender abstratamente todos os conceitos e propriedades sobre Álgebra Matricial e
+sobre vetores aleatórios, que serão essenciais na compreensão e aplicação das
+metodologias estudadas na disciplina.
+
+# Exercícios
+
+## Questão 1
+
+::: {.callout-note}
+# Enunciado:
+
+(2.4.) Se $A\inv$ e $B\inv$ existem, prove que:
+
+a. $(A')\inv=(A\inv)'$
+
+b. $(AB)\inv=B\inv A\inv$
+:::
+
+#### a.
+
+Lembrando que, se $A\inv$ é a inversa de $A$, $AA\inv=I=A\inv A \Rightarrow (AA\inv)'=I'=(A\inv A)'$. E como $I=I'$, temos que $A'(A\inv)'=I=(A\inv)' A'$. Observa-se, então, que $A'$ é a inversa de $(A\inv)'$ e portanto: $(A')\inv=(A\inv)'$.
+
+#### b.
+
+Temos que $(B\inv A\inv)AB=B\inv(A\inv A)B=B\inv B=I$, em resumo: $(B\inv A\inv)AB=I$. Logo:  $AB = (B\inv A\inv )\inv I$, e invertendo: $(AB)\inv = B\inv A\inv$.
+
+## Questão 2
+
+::: {.callout-note}
+# Enunciado:
+
+(2.8.) Dada a matriz
+$$
+A=\begin{bmatrix}
+1 & 2 \\ 2&-2
+\end{bmatrix}
+$$
+
+Encontre os autovalores $\lambda_1, \lambda_2$ e seus autovetores $e_1, e_2$. Determine a decomposição espectral de $A$.
+
+(Resolver manualmente e computacionalmente)
+:::
+
+#### Manualmente
+
+Os autovalores $\lambda_1$ e $\lambda_2$ são obtidos como solução da equação:
+
+$$
+|A-\lambda I|=0 \Rightarrow \begin{vmatrix} 1-\lambda & 2\\2 &-2-\lambda
+\end{vmatrix} =0 \Rightarrow \lambda^2+\lambda-6=0
+$$
+
+Solucionando-a, temos os seguintes autovalores: $\lambda_1=2$ e $\lambda_2=-3$. Para obter os seus correspondentes autovetores, solucionamos para um vetor $\bm{x}$:
+
+$$
+(\lambda I- A)\bm{x}=\bm 0
+$$
+
+Para $\lambda_1$, temos soluções de forma $\bm{x}=k(2,1)'$, $k$ sendo uma constante real. Assim, o autovetor normalizado correspondente é:
+
+$$
+\bm{e_1}=\begin{bmatrix}{2/\sqrt 5}\\{1/\sqrt 5}\end{bmatrix}=
+\begin{bmatrix}{0.8944}\\{0.4472}\end{bmatrix}
+$$
+
+Para $\lambda_2$, temos soluções de forma $\bm{x}=k(1,-2)'$, $k$ sendo uma constante real. Assim, o autovetor normalizado correspondente é:
+
+$$
+\bm{e_2}=\begin{bmatrix}{1/\sqrt 5}\\{-2/\sqrt 5}\end{bmatrix}=
+\begin{bmatrix}{0.4472}\\{-0.8944}\end{bmatrix}
+$$
+
+Com os resultados obtidos, podemos formular a decomposição espectral da matriz $A$ da forma que segue:
+
+$$
+A=\lambda_1\bm{e_1}\bm{e_1}'+\lambda_2\bm{e_2}\bm{e_2}'= E \bm{\lambda} E',
+$$
+
+onde $E=(\bm{e_1},\bm{e_2})$ e $\bm{\lambda}=\text{diag}[(\lambda_1,\lambda_2)]$.
+
+### Computacionalmente
+
+```{r}
+(A <- matrix(c(1,2,2,-2),ncol=2))
+A.eigen <- eigen(A) #funcao eigen() obtem autovalores e autovetores normalizados
+
+#Autovalores
+(lambda <- A.eigen$values)
+#Matriz de autovetores
+(E <- A.eigen$vectors)
+
+# Logo, a decomposição espectral é:
+E%*%diag(lambda)%*%t(E) # =A
+```
+

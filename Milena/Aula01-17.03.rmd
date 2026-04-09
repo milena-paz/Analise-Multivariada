@@ -1,6 +1,8 @@
 ---
 title: "Análise Multivariada - 17/03 e 19/03"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Introdução
