@@ -9,7 +9,7 @@ V.inv <- diag(1/sqrt(diag(S)))
 par(mar=c(4,4,2,1))
 plot(Petal.Width ~ Petal.Length,data=Xs)
 
-identify(x=Xs[,1],y=Xs[,2])
+# identify(x=Xs[,1],y=Xs[,2])
 
 pontos<- c(44,62,135,123)
 

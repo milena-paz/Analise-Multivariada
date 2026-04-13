@@ -2402,10 +2402,11 @@ window.Quarto = {
   <li><a href="#exercícios" id="toc-exercícios" class="nav-link active" data-scroll-target="#exercícios">Exercícios</a>
   <ul class="collapse">
   <li><a href="#questão-1" id="toc-questão-1" class="nav-link" data-scroll-target="#questão-1">Questão 1</a></li>
-  <li><a href="#questão-2" id="toc-questão-2" class="nav-link" data-scroll-target="#questão-2">Questão 2</a>
-  <ul class="collapse">
-  <li><a href="#computacionalmente" id="toc-computacionalmente" class="nav-link" data-scroll-target="#computacionalmente">Computacionalmente</a></li>
-  </ul></li>
+  <li><a href="#questão-2" id="toc-questão-2" class="nav-link" data-scroll-target="#questão-2">Questão 2</a></li>
+  <li><a href="#questão-3" id="toc-questão-3" class="nav-link" data-scroll-target="#questão-3">Questão 3</a></li>
+  <li><a href="#questão-4" id="toc-questão-4" class="nav-link" data-scroll-target="#questão-4">Questão 4</a></li>
+  <li><a href="#questão-5" id="toc-questão-5" class="nav-link" data-scroll-target="#questão-5">Questão 5</a></li>
+  <li><a href="#questão-6" id="toc-questão-6" class="nav-link" data-scroll-target="#questão-6">Questão 6</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -2421,6 +2422,7 @@ window.Quarto = {
 <p><span class="math display">\[
 \newcommand{\inv}{^{-1}}
 \newcommand{\bm}[1]{\mathbf{#1}}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
 \]</span></p>
 </div>
 <p>Este documento apresenta as resoluções dos exercícios propostos, em grande parte do livro de <span class="citation" data-cites="johnson2002">Johnson; Wichern (<a href="#ref-johnson2002" role="doc-biblioref">2002</a>)</span>, <em>Applied multivariate statistical analysis</em> - que foram realizados com o objetivo de compreender abstratamente todos os conceitos e propriedades sobre Álgebra Matricial e sobre vetores aleatórios, que serão essenciais na compreensão e aplicação das metodologias estudadas na disciplina.</p>
@@ -2434,7 +2436,7 @@ window.Quarto = {
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Nota</span>Enunciado:
+<span class="screen-reader-only">Nota</span>Enunciado
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -2462,16 +2464,20 @@ window.Quarto = {
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Nota</span>Enunciado:
+<span class="screen-reader-only">Nota</span>Enunciado
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <p>(2.8.) Dada a matriz <span class="math display">\[
-A=\begin{bmatrix}
-1 &amp; 2 \\ 2&amp;-2
-\end{bmatrix}
+A=\mat{1 &amp; 2 \\ 2&amp;-2}
 \]</span></p>
 <p>Encontre os autovalores <span class="math inline">\(\lambda_1, \lambda_2\)</span> e seus autovetores <span class="math inline">\(e_1, e_2\)</span>. Determine a decomposição espectral de <span class="math inline">\(A\)</span>.</p>
+<p>(2.9.) Seja <span class="math inline">\(A\)</span> como em 2.8.</p>
+<ol type="a">
+<li><p>Encontre <span class="math inline">\(A\inv\)</span></p></li>
+<li><p>Compute os autovalores e autovetores de <span class="math inline">\(A\inv\)</span>.</p></li>
+<li><p>Escreva a decomposição espectral de <span class="math inline">\(A\inv\)</span> e compare-a com a de <span class="math inline">\(A\)</span>.</p></li>
+</ol>
 <p>(Resolver manualmente e computacionalmente)</p>
 </div>
 </div>
@@ -2493,17 +2499,35 @@ A=\begin{bmatrix}
 \]</span></p>
 <p>Para <span class="math inline">\(\lambda_2\)</span>, temos soluções de forma <span class="math inline">\(\bm{x}=k(1,-2)&#39;\)</span>, <span class="math inline">\(k\)</span> sendo uma constante real. Assim, o autovetor normalizado correspondente é:</p>
 <p><span class="math display">\[
-\bm{e_2}=\begin{bmatrix}{1/\sqrt 5}\\{-2/\sqrt 5}\end{bmatrix}=
-\begin{bmatrix}{0.4472}\\{-0.8944}\end{bmatrix}
+\bm{e_2}=\mat{{1/\sqrt 5}\\{-2/\sqrt 5}}=
+\mat{{0.4472}\\{-0.8944}}
 \]</span></p>
 <p>Com os resultados obtidos, podemos formular a decomposição espectral da matriz <span class="math inline">\(A\)</span> da forma que segue:</p>
 <p><span class="math display">\[
-A=\lambda_1\bm{e_1}\bm{e_1}&#39;+\lambda_2\bm{e_2}\bm{e_2}&#39;= E \bm{\lambda} E&#39;,
+A=\lambda_1\bm{e_1}\bm{e_1}&#39;+\lambda_2\bm{e_2}\bm{e_2}&#39;= E \boldsymbol{\lambda} E&#39;,
 \]</span></p>
-<p>onde <span class="math inline">\(E=(\bm{e_1},\bm{e_2})\)</span> e <span class="math inline">\(\bm{\lambda}=\text{diag}[(\lambda_1,\lambda_2)]\)</span>.</p>
+<p>onde <span class="math inline">\(E=(\bm{e_1},\bm{e_2})\)</span> e <span class="math inline">\(\boldsymbol{\lambda}=\text{diag}[(\lambda_1,\lambda_2)]\)</span>.</p>
+<p>A inversa de <span class="math inline">\(A\)</span> pode ser obtida da seguinte forma:</p>
+<p><span class="math display">\[
+A\inv=\frac{1}{|A|}\mat{-2 &amp; -2 \\ -2 &amp; 1}=-\frac{1}{6}\mat{-2 &amp; -2 \\ -2 &amp; 1}=\mat{1/3 &amp; 1/3 \\ 1/3 &amp; -1/6}=\mat{0.3333 &amp; 0.3333 \\ 0.3333 &amp; -0.1667}
+\]</span></p>
+<p>Seus respectivos autovalores são solução da equação:</p>
+<p><span class="math display">\[
+|A\inv-\gamma I|=0 \Rightarrow \begin{vmatrix} 1/3-\gamma &amp; 1/3\\1/3 &amp;-1/6-\gamma
+\end{vmatrix} =0 \Rightarrow \gamma^2 - \frac{1}{6}\gamma-\frac{1}{6}=0
+\]</span></p>
+<p>Temos, então, que <span class="math inline">\(\gamma_1=1/2\)</span> e <span class="math inline">\(\gamma_2=-1/3\)</span>. Percebe-se que eles são o inverso de <span class="math inline">\(\lambda_1\)</span> e <span class="math inline">\(\lambda_2\)</span>. Os autovetores correspondentes são:</p>
+<p>Para <span class="math inline">\(\gamma_1=1/2\)</span>: <span class="math inline">\(\quad \bm{e_1}=\mat{2/\sqrt{5}\\1/\sqrt 5}\)</span></p>
+<p>Para <span class="math inline">\(\gamma_2=-1/3\)</span>: <span class="math inline">\(\quad \bm{e_2}=\mat{1/\sqrt{5}\\-2/\sqrt 5}\)</span></p>
+<p>Temos, então, que os autovetores de <span class="math inline">\(A\inv\)</span> são idênticos aos de <span class="math inline">\(A\)</span>.</p>
+<p>Com os resultados obtidos, podemos formular a decomposição espectral da matriz <span class="math inline">\(A\inv\)</span> da forma que segue:</p>
+<p><span class="math display">\[
+A\inv=\gamma_1\bm{e_1}\bm{e_1}&#39;+\gamma_2\bm{e_2}\bm{e_2}&#39;= E \boldsymbol{\gamma} E&#39;,
+\]</span></p>
+<p>onde <span class="math inline">\(E=(\bm{e_1},\bm{e_2})\)</span> e <span class="math inline">\(\boldsymbol{\gamma}=\text{diag}[(\gamma_1,\gamma_2)]\)</span>.</p>
 </section>
-<section id="computacionalmente" class="level3">
-<h3 class="anchored" data-anchor-id="computacionalmente">Computacionalmente</h3>
+<section id="computacionalmente" class="level4">
+<h4 class="anchored" data-anchor-id="computacionalmente">Computacionalmente</h4>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>(A <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="sc">-</span><span class="dv">2</span>),<span class="at">ncol=</span><span class="dv">2</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -2532,9 +2556,212 @@ A=\lambda_1\bm{e_1}\bm{e_1}&#39;+\lambda_2\bm{e_2}\bm{e_2}&#39;= E \bm{\lambda} 
 [1,]    1    2
 [2,]    2   -2</code></pre>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A inversa de A pode ser obtida usando o comando solve()</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>(A.inv <span class="ot">&lt;-</span> <span class="fu">solve</span>(A))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          [,1]       [,2]
+[1,] 0.3333333  0.3333333
+[2,] 0.3333333 -0.1666667</code></pre>
 </div>
-
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Ainv.eigen <span class="ot">&lt;-</span> <span class="fu">eigen</span>(A.inv)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Autovalores</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>(lambda <span class="ot">&lt;-</span> Ainv.eigen<span class="sc">$</span>values)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  0.5000000 -0.3333333</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Matriz de autovetores</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>(E <span class="ot">&lt;-</span> Ainv.eigen<span class="sc">$</span>vectors)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           [,1]       [,2]
+[1,] -0.8944272  0.4472136
+[2,] -0.4472136 -0.8944272</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Logo, a decomposição espectral é:</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>E<span class="sc">%*%</span><span class="fu">diag</span>(lambda)<span class="sc">%*%</span><span class="fu">t</span>(E)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          [,1]       [,2]
+[1,] 0.3333333  0.3333333
+[2,] 0.3333333 -0.1666667</code></pre>
+</div>
+</div>
 </section>
+</section>
+<section id="questão-3" class="level2">
+<h2 class="anchored" data-anchor-id="questão-3">Questão 3</h2>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Enunciado
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Uma forma quadrática <span class="math inline">\(\bm{x}&#39;A\bm{x}\)</span> é dita positiva definida se a matriz <span class="math inline">\(A\)</span> for positiva definida. A forma quadrática <span class="math inline">\(3x_1^2+3x^2_2-2x_1x_2\)</span> é positiva definida?</p>
+</div>
+</div>
+<p>Primeiro escreveremos a forma quadrática em forma matricial:</p>
+<p><span class="math display">\[
+3x_1^2+3x^2_2-2x_1x_2 = \bm{x}&#39;A\bm{x}= \bm{x}&#39;\mat{3&amp;1\\1&amp;3}\bm{x}
+\]</span></p>
+<p>Como <span class="math inline">\(A\)</span> é simétrica, podemos verificar se ela é positiva definida a partir de seus autovalores ou menores principais. Primeiro, por menores principais, temos:</p>
+<p><span class="math display">\[
+|A_1|=3,\quad |A_2|=|A|=8.
+\]</span></p>
+<p>Como todos são positivos, <span class="math inline">\(A\)</span> é positiva definida. Adicionalmente temos que os autovalores de A são:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">eigen</span>(<span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">3</span>),<span class="at">nrow=</span><span class="dv">2</span>))<span class="sc">$</span>values</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4 2</code></pre>
+</div>
+</div>
+<p>Ou seja, <span class="math inline">\(\lambda_1,\lambda_2&gt;0\)</span>, logo <span class="math inline">\(A\)</span> é positiva definida.</p>
+</section>
+<section id="questão-4" class="level2">
+<h2 class="anchored" data-anchor-id="questão-4">Questão 4</h2>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Enunciado
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>(2.24.) Seja <span class="math inline">\(\bm{X}\)</span> com matriz de covariâncias:</p>
+<p><span class="math display">\[
+\Sigma=\mat{4&amp;0&amp;0\\0&amp;9&amp;0\\0&amp;0&amp;1}
+\]</span> Encontre:</p>
+<ol type="a">
+<li><p><span class="math inline">\(\Sigma\inv\)</span></p></li>
+<li><p>Os autovalores e autovetores de <span class="math inline">\(\Sigma\)</span>.</p></li>
+<li><p>Os autovalores e autovetores de <span class="math inline">\(\Sigma\inv\)</span>.</p></li>
+</ol>
+<p>(Resolver manualmente)</p>
+</div>
+</div>
+<p>Como <span class="math inline">\(\Sigma\)</span> é diagonal, é simples de obter a sua inversa:</p>
+<p><span class="math display">\[
+\Sigma\inv= \mat{1/4&amp;0&amp;0\\0&amp;1/9&amp;0\\0&amp;0&amp;1}
+\]</span></p>
+<p>Ainda usando propriedades das matrizes diagonais, podemos obter os autovalores da diagonal principal: <span class="math inline">\(\boldsymbol{\lambda_\Sigma}=(4,\ 9,\ 1)&#39;\)</span>. E os autovetores são os canônicos, ou seja, são:</p>
+<p><span class="math display">\[
+\bm{e_1}=\mat{1\\0\\0},\quad\bm{e_2}=\mat{0\\1\\0},\quad\bm{e_3}=\mat{0\\0\\1}
+\]</span></p>
+<p>Da mesma forma, temos que os autovalores de <span class="math inline">\(\Sigma\inv\)</span> são <span class="math inline">\(\boldsymbol{\lambda_{\Sigma\inv}}=(1/4,1/9,1)&#39;\)</span> e os autovetores são os mesmos de <span class="math inline">\(\Sigma\)</span>.</p>
+</section>
+<section id="questão-5" class="level2">
+<h2 class="anchored" data-anchor-id="questão-5">Questão 5</h2>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Enunciado
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>(2.25.) Seja <span class="math inline">\(\bm{X}\)</span> com matriz de covariâncias:</p>
+<p><span class="math display">\[
+\Sigma=\mat{25&amp;-2&amp;4\\-2&amp;4&amp;1\\4&amp;1&amp;9}
+\]</span></p>
+<ol type="a">
+<li><p>Determine <span class="math inline">\(\boldsymbol{\rho}\)</span> e <span class="math inline">\(V^{1/2}\)</span></p></li>
+<li><p>Multiplique suas matrizes para verificar a relação <span class="math inline">\(V^{1/2}\boldsymbol{\rho}V^{1/2}=\Sigma\)</span></p></li>
+</ol>
+<p>(2.26) Use <span class="math inline">\(\Sigma\)</span> como dado em 2.25.</p>
+<ol type="a">
+<li><p>Encontre <span class="math inline">\(\rho_{13}\)</span></p></li>
+<li><p>Encontre a correlação entre <span class="math inline">\(X_1\)</span> e <span class="math inline">\(\frac{1}{2}X_2 + \frac{1}{2}X_3\)</span>.</p></li>
+</ol>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">25</span>,<span class="sc">-</span><span class="dv">2</span>,<span class="dv">4</span>,<span class="sc">-</span><span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">9</span>),<span class="at">nrow=</span><span class="dv">3</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Matriz de desvios padrao</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>(V.meio <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">sqrt</span>(<span class="fu">diag</span>(S))))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3]
+[1,]    5    0    0
+[2,]    0    2    0
+[3,]    0    0    3</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#matriz de correlações</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>(rho <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="dv">1</span><span class="sc">/</span><span class="fu">diag</span>(V.meio))<span class="sc">%*%</span>S<span class="sc">%*%</span><span class="fu">diag</span>(<span class="dv">1</span><span class="sc">/</span><span class="fu">diag</span>(V.meio)))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           [,1]       [,2]      [,3]
+[1,]  1.0000000 -0.2000000 0.2666667
+[2,] -0.2000000  1.0000000 0.1666667
+[3,]  0.2666667  0.1666667 1.0000000</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verificando a relação</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>V.meio<span class="sc">%*%</span>rho<span class="sc">%*%</span>V.meio</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3]
+[1,]   25   -2    4
+[2,]   -2    4    1
+[3,]    4    1    9</code></pre>
+</div>
+</div>
+<p>De <span class="math inline">\(\boldsymbol{\rho}\)</span> obtida, temos que <span class="math inline">\(\rho_{13}=4/15\)</span>.</p>
+<p>Digamos que <span class="math inline">\(\bm{Y} = (X_1,\, \frac{1}{2}X_2 + \frac{1}{2}X_3)&#39;\)</span>. Podemos reescrever essa variável como:</p>
+<p><span class="math display">\[
+\bm{Y} =A\bm{X} =\mat{1&amp;0&amp;0\\0&amp;1/2&amp;1/2}\mat{X_1\\X_2\\X_3}
+\]</span></p>
+<p>Pela propriedade de combinações lineares, temos que:</p>
+<p><span class="math display">\[
+\text{Cov}(\bm Y)=\text{Cov}\left(X_1,\, \frac{1}{2}X_2 + \frac{1}{2}X_3\right)=A\Sigma A&#39;
+\]</span></p>
+<p>Logo:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,.<span class="dv">5</span>,<span class="dv">0</span>,.<span class="dv">5</span>),<span class="at">nrow=</span><span class="dv">2</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>A<span class="sc">%*%</span>S<span class="sc">%*%</span><span class="fu">t</span>(A)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2]
+[1,]   25 1.00
+[2,]    1 3.75</code></pre>
+</div>
+</div>
+<p>É a matriz de covariâncias de <span class="math inline">\(\bm{Y}\)</span>. A partir dela, obtemos que:</p>
+<p><span class="math display">\[
+\rho_{Y_1,Y_2}=\frac{1}{\sqrt{25×3.75}}=0.1032796
+\]</span></p>
+</section>
+<section id="questão-6" class="level2">
+<h2 class="anchored" data-anchor-id="questão-6">Questão 6</h2>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Enunciado
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>(2.27.) Obtenha as expressões para a média e variância de cada combinação linear abaixo em termos das médias e covariâncias de <span class="math inline">\(X_1,X_2\)</span> e <span class="math inline">\(X_3\)</span>.</p>
+<ol type="a">
+<li><p><span class="math inline">\(X_1 - 2X_2\)</span></p></li>
+<li><p><span class="math inline">\(-X_1+3X_2\)</span></p></li>
+<li><p><span class="math inline">\(X_1 + X_2 + X_3\)</span></p></li>
+<li><p><span class="math inline">\(X_1+2X_2-X_3\)</span></p></li>
+<li><p><span class="math inline">\(3X_1 -4X_2\)</span> se <span class="math inline">\(X_1\)</span> e <span class="math inline">\(X_2\)</span> são independentes.</p></li>
+</ol>
+</div>
+</div>
+<ol type="a">
+<li><p><span class="math inline">\(\mu_1-2\mu_2\quad \sigma_{11}+4\sigma_{22}-2(2\sigma_{12})\)</span>.</p></li>
+<li><p><span class="math inline">\(3\mu_2-\mu_1\quad \sigma_{11}+9\sigma_{22}-2(3\sigma_{12})\)</span></p></li>
+<li><p><span class="math inline">\(\mu_1+\mu_2+\mu_3\quad \sigma_{11}+\sigma_{22}+\sigma_{33}+2\sigma_{12}+2\sigma_{13}+2\sigma_{23}\)</span></p></li>
+<li><p><span class="math inline">\(\mu_1+2\mu_2-\mu_3\quad \sigma_{11}+4\sigma_{22}+\sigma_{33}+4\sigma_{12}-2\sigma_{13}-4\sigma_{23}\)</span></p></li>
+<li><p><span class="math inline">\(3\mu_1 -4\mu_2\quad 9\sigma_{11}+16\sigma_{22}\)</span></p></li>
+</ol>
+
 </section>
 </section>
 
