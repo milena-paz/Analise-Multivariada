@@ -1,0 +1,315 @@
+---
+title: "Prática - Vetores"
+author: "Milena Paz Freitas"
+format: html
+editor: source
+self-contained: true
+---
+
+::: hidden
+$$
+\newcommand{\bm}{\mathbf}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+$$
+:::
+
+### Objetivo
+
+Verificar os conceitos geométricos de vetores no R.
+
+### Dados e contexto
+
+Usaremos o conhecido conjunto de dados `iris`, especificamente suas variáveis `"Petal.Length"` e `"Petal.Width"`, cujo diagrama de dispersão apresenta uma configuração razoavelmente elíptica. A finalidade é poder visualizar algumas características geométricas das operações vetoriais
+
+O conjunto de dados `X` são as 150 observações dessas duas variáveis e S é sua matriz de covariâncias:
+
+```{r,echo=FALSE}
+x <- iris[,c(3,4)]
+
+(S<- cov(x))
+```
+
+Percebe-se que a variável `"Petal.Length"` domina a variância total. Vamos centrar os dados, armazenando-os na matriz `Xc`.
+
+```{r}
+Xc<- scale(x,scale=F)
+cores <- RColorBrewer::brewer.pal(3,"Set2")
+# Diagrama de dispersão das variáveis centradas
+  # limites simétricos
+lim.x <- c(-1, 1) * 3.2
+lim.y <- c(-1, 1) * 1.3
+
+  # diagrama de dispersão
+plot(x = Xc, pch = 19, xlim = lim.x, ylim = lim.y, 
+    col = cores[as.numeric(iris$Species)])
+
+  # eixos coordenados
+abline(h = 0, v = 0, lty = 2)
+```
+
+Podemos observar esses pontos como vetores centrados, agora, na origem. As setas estão coloridas por espécie:
+
+```{r}
+  # Xc - dados como vetores
+plot(x = Xc, xlim = lim.x, ylim = lim.y, pch = '.',
+    col = cores[as.numeric(iris$Species)])
+arrows(x0 = 0, y0 = 0, x1 = Xc[, 1], y1 = Xc[, 2], lty = 1, length = 0.15, 
+    angle = 15, col = cores[as.numeric(iris$Species)])
+```
+
+Há muitos dados o que dificulta a visualização das operações que efetuaremos. Escolhi os pontos das linhas 44, 62, 123, 135.
+
+```{r}
+  # pontos escolhidos
+pontos <- c(44, 62, 123, 135)
+
+  # Xc - dados como vetores
+plot(x = Xc, xlim = lim.x, ylim = lim.y, pch = '.',
+    col = cores[as.numeric(iris$Species)])
+arrows(x0 = 0, y0 = 0, x1 = Xc[, 1], y1 = Xc[, 2], lty = 1, length = 0.15, 
+    angle = 15, col = cores[as.numeric(iris$Species)])
+
+  # Localização dos pontos escolhidos
+points(x = Xc[pontos, 1], y = Xc[pontos, 2], pch = 3, cex = 1)
+text(x = Xc[pontos, 1], y = Xc[pontos, 2], label = pontos, cex = .85, 
+    pos = 3)
+```
+
+O gráfico vetorial fica então:
+
+```{r}
+  # plot apenas com os 4 pontos
+plot(Xc[pontos, ], xlim = lim.x, ylim = lim.y, type = 'n',
+    col = cores[as.numeric(iris[pontos,]$Species)], asp = 1)
+
+  # setas dos vetores
+arrows(x0 = 0, y0 = 0, x1 = Xc[pontos, 1], y1 = Xc[pontos, 2], lty = 1, 
+     length = 0.15, angle = 15, col = cores[as.numeric(iris[pontos,]$Species)]
+    )
+
+  # identificação dos pontos
+text(x = Xc[pontos, 1], y = Xc[pontos, 2], label = pontos, cex = .85, 
+    pos = 3)
+
+  # eixo original
+abline(h = 0, v = 0)
+```
+
+## Geometria Vetorial
+
+#### Comprimento dos vetores
+
+Os comprimentos (ou norma) desse vetores podem ser obtidos pela raiz quadrada do produto escalar $\sqrt{\bm{x' x}}$. Vamos exemplificar com o ponto 44:
+
+```{r}
+  # vetor associado ao ponto 44
+x44 <- Xc[44, ]
+
+  # Intensidade do vetor (em relação ao eixo x: (1, 0))
+sqrt(t(x44) %*% x44)
+```
+
+O comprimento de todos os 4 vetores pode ser obtido pela raiz quadrada da diagonal do produto $\bm{X_p X_p'}$, em que $\bm{X_p}$ é a matriz 4x2, em que cada linha contém as coordenadas de cada um dos quatro pontos.
+
+```{r}
+  # Comprimento dos 4 vetores
+Xp <- as.matrix(Xc[pontos, ])
+sqrt(diag(Xp %*% t(Xp)))
+```
+
+que são os comprimentos dos vetores associados aos pontos 44, 62, 123 e 135, respectivamente.
+
+#### Projeção dos Vetores
+
+  Sejam os vetores associados aos pontos 44 e 123, vamos projetá-los nos vetores $\bm{ e_1'}=[\sqrt2/2,\sqrt2/2]$ e $\bm{ e_1'}=[-\sqrt2/2,\sqrt2/2]$. Percebam que ambos os vetores são unitários e ortogonais entre si. Verifiquem a situação no gráfico abaixo, que está corrigido tentando evitar distorção devida a diferença de proporção das escalas nos eixo coordenados x e y (asp = 1).
+  
+```{r}
+plot(Xc[pontos, ], xlim = lim.x, ylim = lim.y, type = 'n',
+    col = cores[as.numeric(iris[pontos,]$Species)], asp = 1)
+arrows(x0 = 0, y0 = 0, x1 = Xc[pontos, 1], y1 = Xc[pontos, 2], lty = 1, 
+     length = 0.15, angle = 15, col = cores[as.numeric(iris[pontos,]$Species)]
+    )
+text(x = Xc[pontos, 1], y = Xc[pontos, 2], label = pontos, cex = .85, 
+    pos = 3)
+abline(h = 0, v = 0)
+
+  # vetor e1
+e1 <- c(1, 1)*sqrt(2)/2
+  # vetor e2
+e2 <- c(-1, 1)*sqrt(2)/2
+
+  # Gráfico dos vetores do novo sistema
+k <- 0.5
+arrows(x0 = 0, y0 = 0, 
+    x1 = c(e1[1], e2[1])*k, y1 = c(e1[2], e2[2])*k, 
+    col = 'black', angle = 20, length = .1)
+
+text(x = c(e1[1], e2[1])*k, y = c(e1[2], e2[2])*k, pos = 4,
+    label = c('e1', 'e2'), cex = 0.85, font = 2)
+```
+  
+  A o vetor da projeção do ponto 44 no vetor $\bm e_1$ é efetuada pela operação vetorial $\bm {xe_1e_1}$. de maneira similar podemos calcular o vetor da projeção do ponto 44 em e1. Assim, teremos:
+  
+```{r}
+  # Refazendo o Gráfico anterior
+plot(Xc[pontos, ], xlim = lim.x, ylim = lim.y, type = 'n',
+    col = cores[as.numeric(iris$Species)], asp = 1)
+arrows(x0 = 0, y0 = 0, x1 = Xc[pontos, 1], y1 = Xc[pontos, 2], lty = 1, 
+     length = 0.15, angle = 15, col = cores[as.numeric(iris$Species)]
+    )
+text(x = Xc[pontos, 1], y = Xc[pontos, 2], label = pontos, cex = .85, 
+    pos = 3)
+abline(h = 0, v = 0)
+
+  # Gráfico dos vetores do novo sistema
+k <- 0.5
+arrows(x0 = 0, y0 = 0, 
+    x1 = c(e1[1], e2[1])*k, y1 = c(e1[2], e2[2])*k, 
+    col = 'black', angle = 20, length = .25)
+
+text(x = c(e1[1], e2[1])*k, y = c(e1[2], e2[2])*k, pos = 4,
+    label = c('e1', 'e2'), cex = 0.85, font = 2)
+
+      # ----------------  Projeções  ---------------
+
+  # Projeção do vetor X44 em e1
+prj.e1 <- as.vector((t(x44)%*%e1))*e1
+
+  # intensidade do vetor prj.e1
+mag.e1 <- as.vector((t(x44)%*%e1))
+
+  # projeção em e1
+segments(x0 = 0, y0 = 0, x1 = prj.e1[1], y1 = prj.e1[2], 
+        col = 'red', lwd = 2)
+
+segments(x0 = x44[1], y0 = x44[2], x1 = prj.e1[1], y1 = prj.e1[2],
+        lty = 2)
+
+  # Projeção do vetor X44 em e2
+prj.e2 <- as.vector((t(x44)%*%e2))*e2
+  # intensidade do vetor prj.e2
+mag.e2 <- as.vector((t(x44)%*%e2))
+
+segments(x0 = 0, y0 = 0, x1 = prj.e2[1], y1 = prj.e2[2], 
+        col = 'red', lwd = 2)
+
+segments(x0 = x44[1], y0 = x44[2], x1 = prj.e2[1], y1 = prj.e2[2],
+        lty = 2)
+```
+  
+  $(−1.9497291,1.1021438)$ são as coordenadas do ponto 44 em um novo sistema coordenado associado aos vetores $\bm e_1$ e $\bm e_2$. Podemos transformar as coordenadas de todos para esse novo sistema coordenado, por meio da operação matricial:
+  
+  $$
+  \bm{X_pW},\text{ em que }\bm W =
+  \mat{\frac{\sqrt{2}}{2}&-\frac{\sqrt{2}}{2}\\
+  \frac{\sqrt{2}}{2}&\frac{\sqrt{2}}{2}}
+  $$
+  
+  Fazendo o mesmo desenho das projeções para o ponto 123, temos:
+  
+```{r}
+x123 <- Xc[123,]
+par(mar=c(4.1,4.1,0.2,1))
+  # Refazendo o Gráfico anterior
+plot(Xc[pontos, ], xlim = lim.x, ylim = lim.y, type = 'n',
+    col = cores[as.numeric(iris$Species)], asp = 1)
+arrows(x0 = 0, y0 = 0, x1 = Xc[pontos, 1], y1 = Xc[pontos, 2], lty = 1, 
+     length = 0.15, angle = 15, col = cores[as.numeric(iris$Species)]
+    )
+text(x = Xc[pontos, 1], y = Xc[pontos, 2], label = pontos, cex = .85, 
+    pos = 3)
+abline(h = 0, v = 0)
+
+  # Gráfico dos vetores do novo sistema
+k <- 0.5
+arrows(x0 = 0, y0 = 0, 
+    x1 = c(e1[1], e2[1])*k, y1 = c(e1[2], e2[2])*k, 
+    col = 'black', angle = 20, length = .25)
+
+text(x = c(e1[1], e2[1])*k, y = c(e1[2], e2[2])*k, pos = 4,
+    label = c('e1', 'e2'), cex = 0.85, font = 2)
+
+      # ----------------  Projeções  ---------------
+
+  # Projeção do vetor x123 em e1
+prj.e1 <- as.vector((t(x123)%*%e1))*e1
+  # intensidade do vetor prj.e1
+mag.e1 <- as.vector((t(x123)%*%e1))
+
+  # projeção em e1
+segments(x0 = 0, y0 = 0, x1 = prj.e1[1], y1 = prj.e1[2], 
+        col = 'red', lwd = 2)
+
+segments(x0 = x123[1], y0 = x123[2], x1 = prj.e1[1], y1 = prj.e1[2],
+        lty = 2)
+
+  # Projeção do vetor x123 em e2
+prj.e2 <- as.vector((t(x123)%*%e2))*e2
+  # intensidade do vetor prj.e2
+mag.e2 <- as.vector((t(x123)%*%e2))
+
+segments(x0 = 0, y0 = 0, x1 = prj.e2[1], y1 = prj.e2[2], 
+        col = 'red', lwd = 2)
+
+segments(x0 = x123[1], y0 = x123[2], x1 = prj.e2[1], y1 = prj.e2[2],
+        lty = 2)
+```
+  
+  Para fazer para todo o iris, teremos o seguinte:
+  
+```{r}
+W <- matrix(c(1,1,-1,1)/sqrt(2),nrow=2)
+#sera nossa matriz de rotacao
+Xrot <- Xc%*%W
+colnames(Xrot) <- c(names(x))
+
+plot(Xrot, xlim = lim.x, ylim = lim.y, type = 'p',
+    col = cores[as.numeric(iris$Species)], asp = 1,pch=19)
+
+abline(h=0,v=0,lty=2)
+```
+  
+# Redução de dimensionalidade
+
+:::{.callout-note appearance="minimal"}
+# Teorema: Maximização de Formas Quadráticas
+
+Seja $B$ uma matriz com autovalores $\lambda_1\geq...\geq\lambda_p$ e autovetores normalizados $\bm{e_1},...,\bm{e_p}$. Então:
+
+$$
+\max_{\bm x\neq\bm 0 } \frac{\bm x'B\bm x}{\bm x'\bm x} = \lambda_i,\quad \text{quando }\bm x=\bm e_i.
+$$
+:::
+
+Aplicando a rotação da matriz de autovetores:
+
+```{r}
+Xp <- scale(x)
+(S <- cov(Xc))
+(W <- -1*eigen(S)$vectors) #multiplicando por -1 para mudar direçao dos autovetores
+lambda <- eigen(S)$values
+# (t(W)%*%S%*%W)/(t(W)%*%W)
+
+Ycp<- Xc%*%W # dados centrados rotacionados
+Yp <- Xp%*%W # dados padronizados rotacionados
+
+## gráfico com a escala original
+plot(Xc, xlim = lim.x, ylim = lim.y, type = 'p',
+    col = cores[as.numeric(iris$Species)], asp = 1,pch=19)
+arrows(x0=0,y0=0,x1=W[1,],y1=W[2,],length=0.1)
+
+colnames(Ycp) <- c(names(x))
+
+# nova escala
+plot(Ycp, xlim = lim.x, ylim = lim.y, type = 'p',
+    col = cores[as.numeric(iris$Species)], asp = 1,pch=19)
+
+abline(h=0,v=0,lty=2)
+
+## Variancia das colunas dos dados centrados rotacionados
+apply(Ycp,2,var) # coincidem com os autovalores de S
+lambda/sum(lambda)*100 #porcentagem de variabilidade em cada componente
+apply(x,2,var)
+```
+
+Seria possível então reduzir a apenas uma dimensão, já que ela concentra mais de 99% da variabilidade.
