@@ -2407,6 +2407,8 @@ window.Quarto = {
   <li><a href="#questão-4" id="toc-questão-4" class="nav-link" data-scroll-target="#questão-4">Questão 4</a></li>
   <li><a href="#questão-5" id="toc-questão-5" class="nav-link" data-scroll-target="#questão-5">Questão 5</a></li>
   <li><a href="#questão-6" id="toc-questão-6" class="nav-link" data-scroll-target="#questão-6">Questão 6</a></li>
+  <li><a href="#questão-7" id="toc-questão-7" class="nav-link" data-scroll-target="#questão-7">Questão 7</a></li>
+  <li><a href="#questão-8" id="toc-questão-8" class="nav-link" data-scroll-target="#questão-8">Questão 8</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -2421,8 +2423,9 @@ window.Quarto = {
 <div class="hidden">
 <p><span class="math display">\[
 \newcommand{\inv}{^{-1}}
-\newcommand{\bm}[1]{\mathbf{#1}}
+\newcommand{\bm}[1]{\boldsymbol{#1}}
 \newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\E}{\text{E}}
 \]</span></p>
 </div>
 <p>Este documento apresenta as resoluções dos exercícios propostos, em grande parte do livro de <span class="citation" data-cites="johnson2002">Johnson; Wichern (<a href="#ref-johnson2002" role="doc-biblioref">2002</a>)</span>, <em>Applied multivariate statistical analysis</em> - que foram realizados com o objetivo de compreender abstratamente todos os conceitos e propriedades sobre Álgebra Matricial e sobre vetores aleatórios, que serão essenciais na compreensão e aplicação das metodologias estudadas na disciplina.</p>
@@ -2754,6 +2757,7 @@ A\inv=\gamma_1\bm{e_1}\bm{e_1}&#39;+\gamma_2\bm{e_2}\bm{e_2}&#39;= E \boldsymbol
 </ol>
 </div>
 </div>
+<p>Fazendo uso das propriedades das combinações lineares, temos:</p>
 <ol type="a">
 <li><p><span class="math inline">\(\mu_1-2\mu_2\quad \sigma_{11}+4\sigma_{22}-2(2\sigma_{12})\)</span>.</p></li>
 <li><p><span class="math inline">\(3\mu_2-\mu_1\quad \sigma_{11}+9\sigma_{22}-2(3\sigma_{12})\)</span></p></li>
@@ -2761,6 +2765,96 @@ A\inv=\gamma_1\bm{e_1}\bm{e_1}&#39;+\gamma_2\bm{e_2}\bm{e_2}&#39;= E \boldsymbol
 <li><p><span class="math inline">\(\mu_1+2\mu_2-\mu_3\quad \sigma_{11}+4\sigma_{22}+\sigma_{33}+4\sigma_{12}-2\sigma_{13}-4\sigma_{23}\)</span></p></li>
 <li><p><span class="math inline">\(3\mu_1 -4\mu_2\quad 9\sigma_{11}+16\sigma_{22}\)</span></p></li>
 </ol>
+</section>
+<section id="questão-7" class="level2">
+<h2 class="anchored" data-anchor-id="questão-7">Questão 7</h2>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Enunciado">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Enunciado
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>(2.30) Dado o vetor aleatório <span class="math inline">\(\bm{X}&#39;=[X_1,X_2,X_3,X_4]\)</span> com vetor de médias <span class="math inline">\(\boldsymbol{\mu&#39;_X}=[4,3,2,1]\)</span> e matriz de covariâncias:</p>
+<p><span class="math display">\[
+\Sigma_X=\mat{3&amp;0&amp;2&amp;2\\ 0&amp;1&amp;1&amp;0\\ 2&amp;1&amp;9&amp;-2 \\ 2&amp;0&amp;-2&amp;4}
+\]</span></p>
+<p>Particionando <span class="math inline">\(\bm X\)</span> como:</p>
+<p><span class="math display">\[
+\bm{X}=\mat{X_1\\ X_2 \\ \hdashline X_3\\X_4}=\mat{\bm{X^{(1)}}\\ \hdashline \bm{X^{(2)}}}
+\]</span></p>
+<p>Sejam:</p>
+<p><span class="math display">\[
+A=\mat{1&amp;2}\quad\text{ e }\quad B=\mat{1&amp;-2\\2&amp;-1}
+\]</span> e considere as combinações lineares <span class="math inline">\(A\bm{X^{(1)}}\)</span> e <span class="math inline">\(B\bm{X^{(2)}}\)</span>. Encontre:</p>
+<ol type="a">
+<li><p><span class="math inline">\(\E[\bm{X^{(1)}}]\)</span></p></li>
+<li><p><span class="math inline">\(\E[A\bm{X^{(1)}}]\)</span></p></li>
+<li><p><span class="math inline">\(\text{Cov}(\bm{X^{(1)}})\)</span></p></li>
+<li><p><span class="math inline">\(\text{Cov}(A\bm{X^{(1)}})\)</span></p></li>
+<li><p><span class="math inline">\(\E[\bm{X^{(2)}}]\)</span></p></li>
+<li><p><span class="math inline">\(\E[B\bm{X^{(2)}}]\)</span></p></li>
+<li><p><span class="math inline">\(\text{Cov}(\bm{X^{(2)}})\)</span></p></li>
+<li><p><span class="math inline">\(\text{Cov}(B\bm{X^{(2)}})\)</span></p></li>
+<li><p><span class="math inline">\(\text{Cov}(\bm{X^{(1)}},\bm{X^{(2)}})\)</span></p></li>
+<li><p><span class="math inline">\(\text{Cov}(A\bm{X^{(1)}},B\bm{X^{(2)}})\)</span></p></li>
+</ol>
+</div>
+</div>
+<ol type="a">
+<li><p><span class="math display">\[
+\E[\bm{X^{(1)}}]=\mat{\E(X_1)\\\E(X_2)}=\mat{\mu_1\\ \mu_2}=\mat{4\\ 3}
+\]</span></p></li>
+<li><p><span class="math display">\[
+\E[A\bm{X^{(1)}}]=\E\left(A\mat{X_1\\ X_2}\right)=A\E\left(\mat{X_1\\ X_2}\right)
+=\mat{1&amp;2}\mat{4\\ 3}=4+6=10
+\]</span></p></li>
+<li><p>A matriz de covariâncias da primeira partição com 2 elementos é dada pelas primeiras 2 linhas e 2 colunas da matriz <span class="math inline">\(\Sigma_X\)</span>: <span class="math display">\[
+\text{Cov}(\bm{X^{(1)}})=\Sigma_{11}=\mat{3&amp;0\\0&amp;1}
+\]</span></p></li>
+<li><p><span class="math display">\[
+\text{Cov}(A\bm{X^{(1)}})=A\Sigma_{11}A&#39;=7
+\]</span></p></li>
+<li><p>Similarmente ao feito em (a), temos: <span class="math display">\[
+\E[\bm{X^{(2)}}]=\mat{2\\ 1}
+\]</span></p></li>
+<li><p><span class="math display">\[
+\E[B\bm{X^{(2)}}]=B\E\left(\mat{X_3\\ X_4}\right)
+=\mat{1&amp;-2\\2&amp;4}\mat{2\\ 1}=\mat{0\\8}
+\]</span></p></li>
+<li><p><span class="math display">\[
+\text{Cov}(\bm{X^{(2)}})=\Sigma_{22}=\mat{9&amp;-2\\-2&amp;4}
+\]</span></p></li>
+<li><p><span class="math display">\[
+\text{Cov}(B\bm{X^{(2)}})=B\Sigma_{\bm{X^{(2)}}}B&#39;=\mat{33&amp;-14\\-14&amp;68}
+\]</span></p></li>
+<li><p><span class="math display">\[
+\text{Cov}(\bm{X^{(1)}},\bm{X^{(2)}})=\Sigma_{12}=\mat{2&amp;2\\1&amp;0}
+\]</span></p></li>
+<li><p><span class="math display">\[
+\text{Cov}(A\bm{X^{(1)}},B\bm{X^{(2)}})=
+A\Sigma_{12}B&#39;=\mat{0&amp;16}
+\]</span></p></li>
+</ol>
+</section>
+<section id="questão-8" class="level2">
+<h2 class="anchored" data-anchor-id="questão-8">Questão 8</h2>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Enunciado">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Enunciado
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>(2.38.) Encontre os valores mínimo e máximo da razão <span class="math inline">\(\bm{x&#39;}A\bm{x/x&#39;x}\)</span></p>
+</div>
+</div>
 
 </section>
 </section>

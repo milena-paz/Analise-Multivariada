@@ -20,8 +20,9 @@ csl: abnt.csl
 ::: {.hidden}
 $$
 \newcommand{\inv}{^{-1}}
-\newcommand{\bm}[1]{\mathbf{#1}}
+\newcommand{\bm}[1]{\boldsymbol{#1}}
 \newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\E}{\text{E}}
 $$
 :::
 
@@ -311,6 +312,8 @@ d. $X_1+2X_2-X_3$
 e. $3X_1 -4X_2$ se $X_1$ e $X_2$ são independentes.
 :::
 
+Fazendo uso das propriedades das combinações lineares, temos:
+
 a. $\mu_1-2\mu_2\quad \sigma_{11}+4\sigma_{22}-2(2\sigma_{12})$.
 
 b. $3\mu_2-\mu_1\quad \sigma_{11}+9\sigma_{22}-2(3\sigma_{12})$
@@ -320,3 +323,110 @@ c. $\mu_1+\mu_2+\mu_3\quad \sigma_{11}+\sigma_{22}+\sigma_{33}+2\sigma_{12}+2\si
 d. $\mu_1+2\mu_2-\mu_3\quad \sigma_{11}+4\sigma_{22}+\sigma_{33}+4\sigma_{12}-2\sigma_{13}-4\sigma_{23}$
 
 e. $3\mu_1 -4\mu_2\quad 9\sigma_{11}+16\sigma_{22}$
+
+## Questão 7
+
+:::{.callout-note title="Enunciado"}
+(2.30) Dado o vetor aleatório $\bm{X}'=[X_1,X_2,X_3,X_4]$ com vetor de médias $\boldsymbol{\mu'_X}=[4,3,2,1]$ e matriz de covariâncias:
+
+$$
+\Sigma_X=\mat{3&0&2&2\\ 0&1&1&0\\ 2&1&9&-2 \\ 2&0&-2&4}
+$$
+
+Particionando $\bm X$ como:
+
+$$
+\bm{X}=\mat{X_1\\ X_2 \\ \hdashline X_3\\X_4}=\mat{\bm{X^{(1)}}\\ \hdashline \bm{X^{(2)}}}
+$$
+
+Sejam:
+
+$$
+A=\mat{1&2}\quad\text{ e }\quad B=\mat{1&-2\\2&-1}
+$$
+e considere as combinações lineares $A\bm{X^{(1)}}$ e $B\bm{X^{(2)}}$. Encontre:
+
+a. $\E[\bm{X^{(1)}}]$
+
+b. $\E[A\bm{X^{(1)}}]$
+
+c. $\text{Cov}(\bm{X^{(1)}})$
+
+d. $\text{Cov}(A\bm{X^{(1)}})$
+
+e. $\E[\bm{X^{(2)}}]$
+
+f. $\E[B\bm{X^{(2)}}]$
+
+g. $\text{Cov}(\bm{X^{(2)}})$
+
+h. $\text{Cov}(B\bm{X^{(2)}})$
+
+i. $\text{Cov}(\bm{X^{(1)}},\bm{X^{(2)}})$
+
+j. $\text{Cov}(A\bm{X^{(1)}},B\bm{X^{(2)}})$
+
+:::
+
+a.
+$$
+\E[\bm{X^{(1)}}]=\mat{\E(X_1)\\\E(X_2)}=\mat{\mu_1\\ \mu_2}=\mat{4\\ 3}
+$$
+
+b.
+$$
+\E[A\bm{X^{(1)}}]=\E\left(A\mat{X_1\\ X_2}\right)=A\E\left(\mat{X_1\\ X_2}\right)
+=\mat{1&2}\mat{4\\ 3}=4+6=10
+$$
+
+c. A matriz de covariâncias da primeira partição com 2 elementos é dada pelas primeiras 2 linhas e 2 colunas da matriz $\Sigma_X$:
+$$
+\text{Cov}(\bm{X^{(1)}})=\Sigma_{11}=\mat{3&0\\0&1}
+$$
+
+d.
+$$
+\text{Cov}(A\bm{X^{(1)}})=A\Sigma_{11}A'=7
+$$
+
+e. Similarmente ao feito em (a), temos:
+$$
+\E[\bm{X^{(2)}}]=\mat{2\\ 1}
+$$
+
+f.
+$$
+\E[B\bm{X^{(2)}}]=B\E\left(\mat{X_3\\ X_4}\right)
+=\mat{1&-2\\2&4}\mat{2\\ 1}=\mat{0\\8}
+$$
+
+g.
+$$
+\text{Cov}(\bm{X^{(2)}})=\Sigma_{22}=\mat{9&-2\\-2&4}
+$$
+
+h.
+$$
+\text{Cov}(B\bm{X^{(2)}})=B\Sigma_{\bm{X^{(2)}}}B'=\mat{33&-14\\-14&68}
+$$
+
+i.
+$$
+\text{Cov}(\bm{X^{(1)}},\bm{X^{(2)}})=\Sigma_{12}=\mat{2&2\\1&0}
+$$
+
+j.
+$$
+\text{Cov}(A\bm{X^{(1)}},B\bm{X^{(2)}})=
+A\Sigma_{12}B'=\mat{0&16}
+$$
+
+## Questão 8
+
+:::{.callout-note title="Enunciado"}
+(2.38.) Encontre os valores mínimo e máximo da razão $\bm{x'}A\bm{x/x'x}$ para quaisquer vetores $\bm x'=\mat{x_1,x_2,x_3}$ se:
+
+$$
+A = \mat{13&-4&2\\ -4&13&-2\\ 2&-2&10}
+$$
+:::
