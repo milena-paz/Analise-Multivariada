@@ -1,0 +1,124 @@
+---
+title: "Componentes Principais"
+author: "Milena Paz Freitas"
+format: html
+editor: source
+self-contained: true
+fig-align: center
+---
+
+::: hidden
+$$
+\newcommand{\bm}{\boldsymbol}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\E}{\text{E}}
+$$
+:::
+
+# Introdução
+
+A análise de componentes principais busca reduzir a dimensionalidade dos dados retendo capacidade de interpretação. Explica-se a extrutura de covariâncias e variâncias de conjuntos de variáveis aleatórias através de certas combinações lineares das mesmas.
+
+# Componentes Principais Exatas
+
+Algebricamente, são combinações lineares de $p$ variáveis aleatórias $X_1,...,X_p$. Geometricamente, representam um novo sistema de coordenadas obtidas por rotação do sistema original: os novos eixos representam as direções com maior variabilidade e fornecem uma descrição mais simples e mais parcimoniosa da estrutura de covariâncias.
+
+Para reproduzir a variabilidade total do sistema, são necessárias todas as $p$ componentes. Entre si, as componentes são ortogonais, ou seja, não correlacionadas. O uso de $k$ componentes principais é uma aproximação da variabilidade total, busca-se maximizar a representatividade enquanto se minimiza o número $k$.
+
+A análise de componentes principais não pressupõe normalidade, pode revelar relações insuspeitadas e, em geral, é um passo intermediário para a aplicação de outras técnicas.
+
+## Extração dos Componentes Principais da Matriz de Covariâncias
+
+::: {.callout-note title="Definição: Componentes Principais" appearance="minimal"}
+Sejam o vetor aleatório $\bm{X}'=[X_1,X_2,...,X_p]$, com matriz de covariâncias $\Sigma$ cujos autovalores são $\lambda_1\geq...\geq\lambda_p\geq0$. $Y_1,...,Y_p$ são componentes principais de $\Sigma$ quando:
+
+$$
+Y_j=\bm{a'_jX}=a_{j1}X_1+\cdots+a_{jp}X_p,
+$$ onde $\bm{a'_j}$ é o vetor de coeficientes da j-ésima componente. Temos que:
+
+-   $\E[Y_j]=\E[\bm{a'_jX}]=\bm{a'_j\mu}$
+
+-   $\text{Var}(Y_j)=\text{Var}(\bm{a'_jX})=\bm{a'_j\Sigma a_j}$
+
+-   $\text{Cov}[Y_j,Y_k]=\bm{a'_j\Sigma a_k},\quad j\neq k.$
+
+Buscam-se valores de coeficientes tais que $Y_1,...,Y_p$ tenham variância máxima e sejam não correlacionadas entre si (ortogonais) e que os vetores $\bm{a_i}$ tenham comprimento unitário.
+:::
+
+As componentes principais da matriz de covariâncias $\Sigma$ são definidas como:
+
+$$
+Y_j=\bm{e'_jX}=e_{j1}X_1+\cdots+e_{jp}X_p,
+$$
+ onde $\bm{e'_j}$ é o autovetor correspondente ao j-ésimo autovalor. Temos que:
+
+-   $\E[Y_j]=\E[\bm{e'_jX}]=\bm{e'_j\mu}$
+
+-   $\text{Var}(Y_j)=\text{Var}(\bm{a'_jX})=\bm{a'_j\Sigma a_j}=\lambda_j$
+
+-   $\text{Cov}[Y_j,Y_k]=0,\quad j\neq k.$
+
+Ou seja, cada autovalor $\lambda_j$ representa a variância de uma componente principal $Y_j$. Autovalores são ordenados em ordem decrescente.
+
+:::{.callout-tip appearance="minimal"}
+A variância total e generalizada de $\Sigma$ podem ser obtidas, respectivamente:
+
+$$
+\begin{aligned}
+\text{Total:}\quad\quad&\text{tr}(\Sigma)=\sum^p_{i=1}\sigma_{ii}=\sum^p_{i=1}\lambda_{i}
+\\
+\text{Generalizada:}\quad\quad&|\Sigma|=\prod^p_{i=1}\lambda_i
+\end{aligned}
+$$
+
+Em termos dessas duas medidas globais de variação, $\bm X$ e $\bm Y$ são equivalentes.
+:::
+
+### Aproximação de $\Sigma$
+
+Analisando as $k$ primeiras componentes principais, temos:
+
+$$
+\Sigma\approx \sum^k_{i=1}\lambda_i\bm{e_ie_i'}
+$$
+
+### Correlação entre Componente Principal e V.A.
+
+O coeficiente de correlação entre a componente $Y_i$ de $\Sigma$ e a variável $X_k$ é:
+
+$$
+\rho_{Y_i,X_k}=\frac{e_{ik}\sqrt{\lambda_i}}{\sqrt{\sigma_{kk}}},
+$$
+que mede a contribuição da k-ésima variável na i-ésima componente (a despeito das outras variáveis) -- NÃO mede a importância de $X_k$ na presença de outras variáveis.
+
+# Situação Amostral
+
+No geral, a matriz $\Sigma$ é estimada por:
+
+$$
+S=\mat{S_{11}&\cdots&S_{1p}\\ \vdots&\ddots&\vdots\\ S_{p1}&\cdots&S_{pp}},
+$$
+cujos autovalores e autovetores são dados, respectivamente, por:
+
+* $\hat\lambda_1\geq\cdots\geq\hat\lambda_p\geq0$.
+
+* $\bm{\hat{e_1}},\cdots,\bm{\hat{e_p}}$.
+
+## Propriedades
+
+Denominando $\hat{Y_j}$ a j-ésima componente principal de $S$, temos:
+
+i. Variância: 
+$$
+\text{Var}(\hat{Y}_j)=\hat\lambda_j.
+$$
+
+ii. Covariância entre componentes:
+$$
+\text{Cov}[\hat Y_j,\hat Y_k]=0,\quad j\neq k.
+$$
+
+iii. Variância total estimada explicada pela componente:
+$$
+
+$$
