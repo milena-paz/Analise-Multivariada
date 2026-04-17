@@ -277,7 +277,17 @@ abline(h=0,v=0,lty=2)
 Seja $B$ uma matriz com autovalores $\lambda_1\geq...\geq\lambda_p$ e autovetores normalizados $\bm{e_1},...,\bm{e_p}$. Então:
 
 $$
-\max_{\bm x\neq\bm 0 } \frac{\bm x'B\bm x}{\bm x'\bm x} = \lambda_i,\quad \text{quando }\bm x=\bm e_i.
+\max_{\bm x\perp\bm e_1,...,e_{i-1} } \frac{\bm x'B\bm x}{\bm x'\bm x} = \lambda_i,\quad \text{quando }\bm x=\bm e_i.
+$$
+
+Adicionalmente:
+
+$$
+\max_{\bm x\neq\bm{0}} \frac{\bm x'B\bm x}{\bm x'\bm x} = \lambda_1,\quad \text{quando }\bm x=\bm e_1.
+$$
+
+$$
+\min_{\bm x\neq\bm{0}} \frac{\bm x'B\bm x}{\bm x'\bm x} = \lambda_1,\quad \text{quando }\bm x=\bm e_p.
 $$
 :::
 

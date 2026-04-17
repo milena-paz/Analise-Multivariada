@@ -27,7 +27,7 @@ $$
 :::
 
 Este documento apresenta as resoluções dos
-exercícios propostos, em grande parte do livro de @johnson2002, *Applied multivariate statistical analysis* - que foram realizados com o objetivo de compreender abstratamente todos os conceitos e propriedades sobre Álgebra Matricial e
+exercícios propostos -- em grande parte do livro de @johnson2002, *Applied multivariate statistical analysis* -- que foram realizados com o objetivo de compreender abstratamente todos os conceitos e propriedades sobre Álgebra Matricial e
 sobre vetores aleatórios, que serão essenciais na compreensão e aplicação das
 metodologias estudadas na disciplina.
 
@@ -312,7 +312,7 @@ d. $X_1+2X_2-X_3$
 e. $3X_1 -4X_2$ se $X_1$ e $X_2$ são independentes.
 :::
 
-Fazendo uso das propriedades das combinações lineares, temos:
+Fazendo uso das propriedades das combinações lineares (como a utilizada na Questão 5), temos:
 
 a. $\mu_1-2\mu_2\quad \sigma_{11}+4\sigma_{22}-2(2\sigma_{12})$.
 
@@ -430,3 +430,221 @@ $$
 A = \mat{13&-4&2\\ -4&13&-2\\ 2&-2&10}
 $$
 :::
+
+Seja $A$ uma matriz com autovalores $\lambda_1\geq...\geq\lambda_p\geq0$ e autovetores normalizados $\bm{e_1},...,\bm{e_p}$. Temos:
+
+
+$$
+\min_{\bm x\neq\bm{0}} \frac{\bm x'B\bm x}{\bm x'\bm x} = \lambda_1,\quad \text{quando }\bm x=\bm e_p;
+$$
+e
+
+$$
+\max_{\bm x\neq\bm{0}} \frac{\bm x'B\bm x}{\bm x'\bm x} = \lambda_1,\quad \text{quando }\bm x=\bm e_1.
+$$
+
+Assim, obtemos:
+
+```{r}
+A <- matrix(c(13,-4,2,-4,13,-2,2,-2,10),ncol=3)
+## Autovalores de A
+lambda <- eigen(A)$values
+
+## VALOR MÍNIMO DA RAZÃO
+lambda[1]
+
+## VALOR MÁXIMO DA RAZÃO
+lambda[3]
+```
+
+
+## Questão 9
+
+:::{.callout-note title="Enunciado"}
+(2.41.) Dado o vetor aleatório $\bm{X}'=[X_1,X_2,X_3,X_4]$ com vetor de médias $\bm{\mu'_X}=[3,2,-2,0]$ e matriz de covariâncias:
+
+$$
+\Sigma_{\bm{X}}=\mat{3&0&0&0\\ 0&3&0&0\\ 0&0&3&0\\ 0&0&0&3}
+$$
+
+Seja
+
+$$
+A=\mat{1&-1&0&0\\1&1&-2&0\\ 1&1&1&-3}
+$$
+
+a. Encontre $\E(A\bm{X})$.
+
+b. Encontre $\text{Cov}(A\bm{X})$.
+
+c. Quais pares de combinações lineares possuem covariância zero?
+:::
+
+```{r}
+A <- matrix(c(1,1,1,-1,1,1,0,-2,1,0,0,-3),ncol=4)
+mu <- c(3,2,-2,0)
+S <- diag(c(3,3,3,3))
+# Valores esperados de AX
+A%*%mu
+
+# Covariâncias de AX
+A%*%S%*%t(A)
+```
+
+Temos que todos os pares de combinação linear têm covariância zero.
+
+
+## Questão 10
+
+:::{.callout-note title="Enunciado"}
+(2.42.) Repetir o exercício 2.41., porém com:
+
+$$
+\Sigma_{\bm{X}}=\mat{3&1&1&1\\ 1&3&1&1\\ 1&1&3&1\\ 1&1&1&3}
+$$
+:::
+
+Temos que o valor esperado é inalterado:
+
+$$
+\E[A\bm{X}]=A\bm{\mu_X}=\mat{1\\9\\3}.
+$$
+
+As covariâncias, por sua vez, são:
+
+```{r}
+S[S==0] <-1
+A%*%S%*%t(A)
+```
+
+As covariâncias entre cada combinação linear continuam sendo zero.
+
+## Questão 11
+
+:::{.callout-note title="Enunciado"}
+Um educador do campo de pesquisa educacional coletou algumas pontuações de
+testes de um grupo de oito estudantes.
+
+```{r,echo=FALSE}
+dds <- read.table("D:/Documentos (D)/UFJF/9-PERIODO/multivariada_nogit/dados.txt",
+                  col.names=c("Estudante","Ling","Logi","Geom","Sexo"))
+kableExtra::kbl(dds,escape=F,format="html",
+                col.names = c("Estudante", 
+                "Linguagem \\((x_1)\\)", 
+                "Lógico \\((x_2)\\)", 
+                "Geométrico \\((x_3)\\)", 
+                "Sexo (Masculino=1)"))
+```
+
+Usando os dados da linha da matriz $\bm{X} = \mat{\bm{x_1}& \bm{x_2}& \bm{x_3}}$, calcule as seguintes matrizes.
+
+a. O vetor centróide $\bar{x}'=(\bar{x}_1,\bar{x}_2,\bar{x}_3)$.
+
+b. A matriz $\bm{X}_c$ dos dados centrados.
+
+c. A matriz $\bm{X}_s$ dos dados padronizados.
+
+d. A soma da matriz quadrada $(\bm{X}_c)'\bm{X}_c$.
+
+e. A matriz de covariâncias $S=(\bm{X}_c)'\bm{X}_c\frac{1}{n-1}$
+
+f. A matriz de correlações $R=(\bm{X}_s)'\bm{X}_s\frac{1}{n-1}$
+:::
+
+```{r}
+x <- as.matrix(dds[2:4])
+# vetor centroide
+xbar <- apply(x,2,mean)
+xbar
+#matriz de dados centrados e padronizados
+scale(x,scale=F) -> Xc
+attributes(Xc)[3] <- NULL
+Xc
+scale(x) -> Xs
+attributes(Xs)[3:4] <- NULL
+round(Xs,3)
+#soma da matriz quadrada
+sum(t(Xc)%*%Xc)
+#matriz de covariancias
+S <- t(Xc)%*%Xc/7
+S
+```
+
+## Questão 12
+
+:::{.callout-note title="Enunciado"}
+O pesquisador está interessado em encontrar
+uma combinação linear para compilar o desempenho no teste de cada um dos
+oito estudantes. Ele propõe dar um peso de 25% à pontuação em aptidão para
+a linguagem $(x_1)$, um peso de 25% para a pontuação em raciocínio analógico
+$(x_2)$ e um peso de 50% à pontuação em raciocínio geométrico $(x_3)$.
+
+a. Encontre o vetor $\bm w'=( w_1,w_2,w_3)$, de comprimento unitário que realize esse esquema relativo de ponderação.
+
+b. Encontre a combinação linear usando o dado bruto $(\bm{z_1} = \bm{X w})$ e o dado
+padronizado $(\bm{z_2} = \bm{X_s w})$.
+
+c. Compare as pontuações dos estudantes C e D. Qual estudante é melhor
+em $\bm z_1$? Qual estudante é melhor em $\bm z_2$?
+
+:::
+
+```{r}
+# vetor peso
+w<- c(25,25,50)
+w <- w/sqrt(c(t(w)%*%w))
+# obtendo as combinações lineares
+z1 <- x%*%w
+z2 <- Xs%*%w
+
+z1[c(3,4)]
+z2[c(3,4)]
+```
+
+Para ambas combinações, temos que o aluno C teve melhor pontuação. Porém, podemos inferir que ambos estão abaixo da média, pois em $\bm z_2$ os dois estão com pontuação padronizada negativa.
+
+## Questão 13
+
+:::{.callout-note title="Enunciado"}
+(Dados do exercício anterior). Divida agora os dados em dois grupos: homens
+e mulheres. Para cada grupo forme a matriz $\bm{X} = \mat{\bm{x_1}& \bm{x_2}& \bm{x_3}}$ e determine o seguinte:
+
+a. O vetor centróide $\bar{x}'=(\bar{x}_1,\bar{x}_2,\bar{x}_3)$.
+
+b. A matriz de covariâncias $S=(\bm{X}_c)'\bm{X}_c\frac{1}{n-1}$
+
+c. Parece haver diferenças nos dois grupos tanto no nível ou nas
+dispersões de suas pontuações nos testes?
+
+:::
+
+```{r}
+##  Para os alunos homens  ##
+x.h <- dds[dds$Sexo==1,c(2:4)]
+#vetor centroide
+(mu.h <- apply(x,2,mean))
+#matriz de covariâncias
+cov(x.h) #poderia ser obtido da mesma forma que na questao 11 tambem
+
+##  Para as alunas mulheres  ##
+x.m <- dds[dds$Sexo==0,c(2:4)]
+#vetor centroide
+(mu.m <- apply(x,2,mean))
+#matriz de covariâncias
+cov(x.m) #poderia ser obtido da mesma forma que na questao 11 tambem
+```
+
+Pelos resultados anteriores, parece, sim, que há uma diferença de desempenho entre os sexos. Podem ser conduzidos testes de hipóteses (presumindo normalidade das pontuações), para cada competência:
+
+```{r}
+nomes <- c("Linguagem", "Lógico", "Geométrico")
+for(disc in 1:3){
+  cat("--------------------------- Teste para médias de",nomes[disc]," ---------------------------\n")
+  print(t.test(x.h[,disc],x.m[,disc]))
+  cat("--------------------------- Teste para variâncias de",nomes[disc]," ---------------------------\n")
+  print(var.test(x.h[,disc],x.m[,disc]))
+  cat("#################################################################################\n")
+}
+```
+
+Para um nível de significância $\alpha=0.05$, não há evidência para rejeitar a hipótese nula em nenhum dos testes; ou seja, não podemos afirmar que um sexo performa melhor que o outro ou que há diferença significativa na variação entre eles.
