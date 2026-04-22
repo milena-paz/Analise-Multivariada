@@ -1,0 +1,207 @@
+---
+title: "Modelagem da felicidade de residentes dos países"
+subtitle: "CW03 - Análise de Regressão"
+author: 
+  - "Milena Paz Freitas - 202165109AD" 
+  - "Bernardo Ferreira Almeida - 202365602D"
+format: html
+lang: "pt-BR"
+date: today
+editor: source
+embed-resouces: true
+---
+
+Neste trabalho, com fins pedagógicos, foi explorado e ajustado um modelo para pontuação de satisfação(felicidade) em residir em certos países. A partir dos dados, foi realizada uma análise exploratória, definição do modelo e avaliação de contribuição de cada uma das covariáveis.
+
+#### Palavras-Chave:
+
+Regressão Múltipla; Qualidade de vida; Teste de Hipóteses.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Introdução
+
+Desejamos identificar uma relação entre a pontuação de 1 a 10 atribuída à felicidade da população de determinados países (Helliwell et al. (2022)) e outras variáveis indicativas de qualidade de vida. Para esse fim, foi utilizada a base de dados de *World Happiness*, onde se encontram essas pontuações obtidas para cada país, correspondendo à média
+de três anos de cerca de 1.000 entrevistas anuais. O modelo que iremos ajustar, inicialmente, será do tipo:
+
+$$
+Score ∼ GDP + Social + Healthy + Freedom + Generosity + Corruption.
+$$
+
+# Análise Exploratória dos Dados
+
+Com o intuito de identificar relação entre a pontuação da nação e outras covariáveis indicadoras de qualidade de vida, realiza-se uma análise exploratória. Foi feita análise descritiva dos dados, obtendo a seguinte tabela:
+
+```{r,message=FALSE}
+rm(list = ls(all = TRUE))
+setwd("/home/sala/Documentos/MILENA-ANALISE.MULTIVARIADA/Regressao")
+
+library("dplyr") #glimpse
+library("ggplot2")
+library("kableExtra")
+library("readxl")
+library(kableExtra)
+varia<- c("GDP","Social","Healthy","Freedom","Generosity","Corruption","Score")
+dados <- read_excel(path = "Worldhappiness.xls",
+                    sheet = "Database")%>%
+  subset(select=varia)
+
+desc <- function(x){
+  mea<- mean(x)
+  med <- median(x)
+  q<-quantile(x,c(.25,.75))
+  minmax <- c(min(x),max(x))
+  cv <- sd(x)/mean(x)*100
+  return(c(mea,med,q,minmax,cv))
+}
+nomes <- c("Média","Mediana","Q1","Q3","Mínimo","Máximo","CV")
+tab <- t(apply(dados,2,desc))
+kbl(tab, col.names = nomes)
+```
+
+Aqui é especialmente fácil observar que nenhuma nação obteve pontuação acima de 8 pontos. Além desses resultados, temos como explorar os dados visualmente. Por exemplo, uma matriz de gráficos:
+
+```{r}
+#| fig-cap: "Matriz de Gráficos de Dispersão"
+#| fig-align: "center"
+plot(dados,cex=.5)
+```
+
+É interessante observar a linha/coluna de Score em relação às outras variáveis, já que é a pontuação que desejamos explicar por meio delas.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-align: "center"
+#| fig-cap: "Boxplot das variáveis explicativas"
+cores <- RColorBrewer::brewer.pal(7,"Set3")
+boxplot(dados[,varia[1]],col=cores[1],xlim=c(0,7),at=1,pch=19)
+for(i in 2:6)
+  boxplot(dados[,varia[i]],at=i,add=T,col=cores[i],pch=19)
+axis(1,at=1:6,labels=varia[-7])
+```
+
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| fig-cap: "Boxplot da pontuação"
+#| fig-align: "center"
+boxplot(dados[,varia[7]],xlab="Score",col=cores[7])
+```
+
+```{r}
+#| fig-cap: "Histogramas de densidade das covariáveis"
+#| fig-align: "center"
+par(mar=c(3.1,3.1,2,1),mfrow=c(2,3))
+dads<- as.data.frame(dados)
+for(i in 1:6)
+  hist(dads[,i],freq=F,col=cores[i],main=paste0("Histograma de ",varia[i]))
+```
+
+# Modelo de regressão
+
+Os coeficientes encontrados foram:
+
+```{r}
+#| echo: false
+dados <- read_excel(path = "Worldhappiness.xls",
+                    sheet = "Database")
+
+coef <- lm(Score ~ GDP + Social + Healthy + Freedom + Generosity + Corruption,data=dados)$coefficients
+kbl(t(coef))
+```
+
+A interpretação para este modelo é como segue: temos 7 parâmetros, o intercepto dita qual o valor médio previsto para a variável resposta(Score) caso todas as outras variáveis independentes sejam 0. Os outros números ditam o quanto a variável resposta aumenta em média para cada unidade de aumento da variável pergunta associada àquele parâmetro (assumindo que as outras variáveis permaneçam constantes).
+
+Note que todos eles são positivos, ou seja, o aumento de qualquer uma dessas variáveis causará, em média, um aumento no score de felicidade. O mesmo vale para o caso de diminuição de qualquer uma dessas variáveis, haverá um decrescimento médio na variável resposta.
+
+Freeedom, Social e Healthy estarem entre os maiores coeficientes significa que esses são os que mais influenciariam positivamente na felicidade geral caso aumentassem.
+Enquanto GDP, por exemplo, não afetaria no aumento tão bem quanto algum desses 3.
+
+## Teste de hipóteses
+
+Com valor de significância $\alpha = 0.05$ fizemos um teste bilateral que busca testar a hipótese de que algum respectivo $\beta$ não é igual a 0, ou seja, testar se ele traz significância para o modelo, já que se ele fosse 0, a variável pergunta associada a ele não teria efeito algum no resultado final e o modelo poderia ser reduzido.
+
+Ou seja, nossas hipóteses são, para cada $\beta_i$ no modelo:
+
+$$
+\Large \begin{cases} 
+          \mathcal H_0 & \beta_i = 0\\
+          \mathcal A & \beta_i \not= 0
+       \end{cases}
+$$
+As estatisticas encontradas foram as seguintes:
+
+```{r}
+#| echo: false
+
+estatisticas <- numeric(7)
+#Testando se sao iguais a zero.
+#Nesse teste elas seguem uma t_{n-p}, n = tamanho do conjunto de dados, p=qtd de parametros/betas/variaveis expl.
+
+calcula_estatistica <- function(i)
+{
+  Y <- as.matrix(dados[,3])
+  #X e a matriz de desenho
+  X <- as.matrix(dados[,-c(1:6)])
+  #Fazendo aquela primeira linha com tudo 1.
+  X <- cbind(1,X)
+  C <- solve(t(X)%*%X)
+  QMRes <- t(Y - X%*%matrix(coef,ncol=1))%*%(Y - X%*%matrix(coef,ncol=1))/(nrow(dados)-7)
+  estat <- (coef[i]-0)/(QMRes*sqrt(C[i,i]))
+  return(estat)
+}
+
+for(k in 1:7)
+  estatisticas[k] <- calcula_estatistica(k)
+
+testa_hipoteses <- function(i)
+{
+  alfa <- 0.05
+  pvalor <- pt(estatisticas[i],df=nrow(dados)-7)
+  return(pvalor < alfa/2 || pvalor > 1 - alfa/2)
+}
+
+#Nao pude criar com numeric(), pois queria resultados booleanos
+resultados_teste <- FALSE
+
+for(k in 1:7)
+{
+  resultados_teste[k] <- testa_hipoteses(k)
+}
+
+kbl(t(round(estatisticas,3)),escape=F,col.names=paste0("\\[\\beta_",0:6,"\\]"))
+```
+
+A regiao de rejeição para as hipóteses:
+
+```{r}
+#| echo: false
+
+print(c(-Inf,qt(c(0.025,0.975),nrow(dados)-7)[1]))
+print(c(qt(c(0.025,0.975),nrow(dados)-7)[2],Inf))
+```
+
+Para todos os coeficientes calculados, a hipótese nula foi rejeitada, então, com 95% de confiabilidade, nosso modelo é inteiramente significativo, nenhuma variável inclusa tem efeito negligível.
+
+# Conclusão 
+
+Ao tentarmos modelar a felicidade média de cada país, colocamos em um modelo linear da forma:
+
+$$
+Y = \beta_0 + \beta_1GDP + \beta_2Social + \beta_3 Healthy + \beta_4 Freedom + \beta_5Generosity + \beta_6 Corruption + \epsilon,
+$$
+$\epsilon\sim N(0,\sigma^2)$
+
+Ao estimarmos os coeficientes, encontramos que todos são positivos, o que indica que o aumento de qualquer uma das variáveis cria um aumento médio na felicidade total.
+
+Além de serem todos positivos, eles ficam todos entre 0.5 e 2, que, ao considerar a escala da variável resposta ser de 0 a 10, mostra que as variáveis contribuem e afetam relativamente bem no resultado. 
+
+Porém, elas serem positivas não é o suficiente para assumir que o modelo é significativo. Então, em seguida foi feito um teste de hipótese para cada variável, com o intuito de verificar sua contribuição para o modelo no geral, foi encontrado que todas as hipóteses nulas foram rejeitadas, e que assim todas as variáveis contribuíam para o modelo.
+
+## Referências
+
+Helliwell, J. F., R. Layard, J. D. Sachs, J.-E. De Neve, L. B. Aknin, and S. Wang (2022). **World
+Happiness Report 2022**. New York: Sustainable Development Solutions.
