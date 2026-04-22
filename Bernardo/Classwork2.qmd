@@ -1,0 +1,97 @@
+---
+title: "Classwork 2"
+format: pdf
+---
+
+Bernardo Ferreira Almeida 202365602d
+
+## Modelo de regressao
+
+```{r}
+#| echo: false
+
+library(readxl)
+dados <- read_excel("C:\\Users\\USER\\Desktop\\Coisas em R\\UFJF\\Tiago\\Analise de regressao\\Trabalhos\\Classwork\\Worldhappiness.xls")
+```
+
+Os coeficientes encontrados foram:
+
+```{r}
+#| echo: false
+coef <- lm(Score ~ GDP + Social + Healthy + Freedom + Generosity + Corruption,data=dados)$coefficients
+print(coef)
+```
+
+A interpretação para este modelo é a seguinte: temos 7 parâmetros, o intercepto dita qual o valor médio previsto para a variável resposta caso todas as outras variáveis independentes sejam 0. Os outros números ditam o quanto a variável resposta aumenta em média para cada unidade de aumento da variável pergunta associada àquele parâmetro (assumindo que as outras variáveis permaneçam constantes).
+
+Note que todos eles são positivos, ou seja, o aumento de qualquer uma dessas variáveis causará, em média, um aumento no score de felicidade. O mesmo vale para o caso de diminuição de qualquer uma dessas variáveis, haverá um decrescimento médio na variável resposta.
+
+Liberdade, social e saúde estarem entre os maiores coeficientes significa que esses são os que mais influenciariam positivamente na felicidade geral caso aumentassem.
+Enquanto GDP, por exemplo, não afetaria no aumento tão bem quanto algum desses 3.
+
+## Teste de hipotese
+
+Com valor de significância $\alpha = 0.05$ fizemos um teste bilateral que busca testar a hipótese de que algum respectivo $\beta$ não é igual a 0, ou seja, testar se ele traz significância para o modelo, já que se ele fosse 0, a variável pergunta associada a ele não teria efeito algum no resultado final e o modelo poderia ser reduzido.
+
+Ou seja, nossas hipóteses são, para cada $\beta_i$ no modelo:
+
+$$
+\Large \begin{cases} 
+          \mathcal H_0 & \beta_i = 0\\
+          \mathcal A & \beta_i \not= 0
+       \end{cases}
+$$
+
+As estatisticas encontradas foram as seguintes:
+
+```{r}
+#| echo: false
+
+estatisticas <- numeric(7)
+#Testando se sao iguais a zero.
+#Nesse teste elas seguem uma t_{n-p}, n = tamanho do conjunto de dados, p=qtd de parametros/betas/variaveis expl.
+
+calcula_estatistica <- function(i)
+{
+  Y <- as.matrix(dados[,3])
+  #X e a matriz de desenho
+  X <- as.matrix(dados[,-c(1:6)])
+  #Fazendo aquela primeira linha com tudo 1.
+  X <- cbind(1,X)
+  C <- solve(t(X)%*%X)
+  QMRes <- t(Y - X%*%matrix(coef,ncol=1))%*%(Y - X%*%matrix(coef,ncol=1))/(nrow(dados)-7)
+  estat <- (coef[i]-0)/(QMRes*sqrt(C[i,i]))
+  return(estat)
+}
+
+for(k in 1:7)
+  estatisticas[k] <- calcula_estatistica(k)
+
+testa_hipoteses <- function(i)
+{
+  alfa <- 0.05
+  pvalor <- pt(estatisticas[i],df=nrow(dados)-7)
+  return(pvalor < alfa/2 || pvalor > 1 - alfa/2)
+}
+
+#Nao pude criar com numeric(), pois queria resultados booleanos
+resultados_teste <- FALSE
+
+for(k in 1:7)
+{
+  resultados_teste[k] <- testa_hipoteses(k)
+}
+
+estatisticas
+```
+
+A regiao de rejeicao para as hipoteses:
+
+```{r}
+#| echo: false
+
+print(c(-Inf,qt(c(0.025,0.975),nrow(dados)-7)[1]))
+print(c(qt(c(0.025,0.975),nrow(dados)-7)[2],Inf))
+```
+
+Para todos os coeficientes calculados, a hipótese nula foi rejeitada, então, com 95% de confiabilidade, nosso modelo é inteiramente significativo, nenhuma variável inclusa tem efeito 0.
