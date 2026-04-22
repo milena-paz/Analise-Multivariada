@@ -22,6 +22,10 @@ coef <- lm(Score ~ GDP + Social + Healthy + Freedom + Generosity + Corruption,da
 print(coef)
 ```
 
+$$
+Y = 1.66 + 0.55GDP + 1.4Soc + 1.27Hea +1.6Fre + 0.96 Gen + 0.73 Cor +\epsilon,\epsilon \sim N(0,\sigma^2)
+$$
+
 A interpretação para este modelo é a seguinte: temos 7 parâmetros, o intercepto dita qual o valor médio previsto para a variável resposta caso todas as outras variáveis independentes sejam 0. Os outros números ditam o quanto a variável resposta aumenta em média para cada unidade de aumento da variável pergunta associada àquele parâmetro (assumindo que as outras variáveis permaneçam constantes).
 
 Note que todos eles são positivos, ou seja, o aumento de qualquer uma dessas variáveis causará, em média, um aumento no score de felicidade. O mesmo vale para o caso de diminuição de qualquer uma dessas variáveis, haverá um decrescimento médio na variável resposta.
@@ -95,3 +99,17 @@ print(c(qt(c(0.025,0.975),nrow(dados)-7)[2],Inf))
 ```
 
 Para todos os coeficientes calculados, a hipótese nula foi rejeitada, então, com 95% de confiabilidade, nosso modelo é inteiramente significativo, nenhuma variável inclusa tem efeito 0.
+
+# Conclusao
+
+Ao tentarmos modelar a a felicidade media de cada pais, colocamos em um modelo linear da forma:
+
+$$
+Y = \beta_0 + \beta_1GDP + \beta_2Soc + \beta_3 Hea + \beta_4 Fre + \beta_5Gen + \beta_6 Cor + \epsilon,\epsilon\sim N(0,\sigma^2)
+$$
+
+Ao estimarmos os coeficientes, encontramos que todos são positivos, o que indica que o aumento de qualquer uma das variáveis cria um aumento médio na felicidade total.
+
+Além de serem todos positivos, eles ficam todos entre 0.5 e 2, que, ao considerar a escala da variável resposta ser de 0 a 10, mostra que as variáveis contribuem e afetam relativamente bem no resultado. 
+
+Porém, elas serem positivas não é o suficiente para assumir que o modelo é significativo. Então, em seguida foi feito um teste de hipótese para cada variável, com o intuito de verificar sua contribuição para o modelo no geral, foi encontrado que todas as hipóteses nulas foram rejeitadas, e que assim todas as variáveis contribuíam para o modelo.
