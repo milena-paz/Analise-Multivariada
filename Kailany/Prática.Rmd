@@ -1,0 +1,372 @@
+---
+title: "Prática Análise Multivariada"
+author: "Jess"
+date: "2026-04-14"
+output: html_document
+---
+
+## Objetivo
+
+Verificar conceitos geométricos de vetores utilizando o conjunto de dados iris.
+
+#### dados
+```{r}
+# matriz de dados
+X <- iris[c("Petal.Length", "Petal.Width")]
+
+# matriz de covariâncias
+S <- cov(X)
+S
+```
+
+Comentário:
+A variável Petal.Length apresenta maior variância, dominando a dispersão.
+
+#### Centralização dos dados
+
+```{r}
+# dados centrados
+Xc <- scale(X, center = TRUE, scale = FALSE)
+```
+
+Comentário:
+Os dados passam a ter média zero, permitindo interpretação como vetores a partir da origem.
+
+#### Gráfico de dispersão
+
+```{r}
+# cores por espécie
+cores <- c("red", "green", "blue")
+
+# limites
+lim.x <- c(-1, 1) * 3.2
+lim.y <- c(-1, 1) * 1.3
+
+# gráfico
+plot(Xc, pch = 19, xlim = lim.x, ylim = lim.y,
+     col = cores[as.numeric(iris$Species)])
+
+# eixos
+abline(h = 0, v = 0, lty = 2)
+```
+
+Comentário:
+A nuvem de pontos apresenta formato aproximadamente elíptico.
+
+#### Representação vetorial
+
+```{r}
+plot(Xc, xlim = lim.x, ylim = lim.y, pch = '.',
+     col = cores[as.numeric(iris$Species)])
+
+arrows(0, 0, Xc[,1], Xc[,2],
+       length = 0.15, angle = 15,
+       col = cores[as.numeric(iris$Species)])
+```
+Comentário:
+Cada observação é interpretada como um vetor com origem em (0,0).
+
+#### Seleção de pontos
+
+```{r}
+# pontos escolhidos
+pontos <- c(44, 62, 123, 135)
+
+plot(Xc, xlim = lim.x, ylim = lim.y, pch = '.',
+     col = cores[as.numeric(iris$Species)])
+
+arrows(0, 0, Xc[,1], Xc[,2],
+       length = 0.15, angle = 15,
+       col = cores[as.numeric(iris$Species)])
+
+# destacar pontos
+points(Xc[pontos,1], Xc[pontos,2], pch = 3, cex = 1)
+text(Xc[pontos,1], Xc[pontos,2],
+     labels = pontos, pos = 3)
+```
+
+Comentário:
+A seleção reduz a quantidade de vetores, facilitando a visualização.
+
+#### Gráfico com apenas os 4 vetores
+
+```{r}
+plot(Xc[pontos, ], xlim = lim.x, ylim = lim.y,
+     type = "n", asp = 1)
+
+arrows(0, 0,
+       Xc[pontos,1], Xc[pontos,2],
+       length = 0.15, angle = 15,
+       col = cores[as.numeric(iris$Species[pontos])])
+
+text(Xc[pontos,1], Xc[pontos,2],
+     labels = pontos, pos = 3)
+
+abline(h = 0, v = 0)
+```
+Comentário:
+Os vetores selecionados permitem analisar direção, magnitude e possíveis relações geométricas.
+
+#### Comprimento dos Vetores
+
+## Comprimento dos Vetores
+
+```{r}
+# vetor do ponto 44
+x44 <- Xc[44, ]
+
+# norma do vetor
+sqrt(t(x44) %*% x44)
+
+# transformar em escalar
+as.vector(sqrt(t(x44) %*% x44))
+```
+
+Comentário:
+A norma é dada por √(x'x), representando o comprimento do vetor.
+
+#### Comprimento dos 4 vetores
+
+```{r}
+Xp <- as.matrix(Xc[pontos, ])
+
+# normas
+sqrt(diag(Xp %*% t(Xp)))
+```
+
+Comentário:
+A diagonal contém os produtos internos de cada vetor com ele mesmo.
+
+#### Projeção dos Vetores
+
+```{r}
+# gráfico base
+plot(Xc[pontos, ], xlim = lim.x, ylim = lim.y, type = 'n', asp = 1)
+
+arrows(0, 0, Xc[pontos,1], Xc[pontos,2],
+       length = 0.15, angle = 15,
+       col = cores[as.numeric(iris$Species[pontos])])
+
+text(Xc[pontos,1], Xc[pontos,2],
+     labels = pontos, pos = 3)
+
+abline(h = 0, v = 0)
+```
+#### Base ortonormal
+
+```{r}
+# vetores base
+e1 <- c(1, 1)*sqrt(2)/2
+e2 <- c(-1, 1)*sqrt(2)/2
+
+e1
+e2
+```
+
+Comentário:
+Vetores unitários e ortogonais → nova base.
+
+#### Visualização da nova base
+
+```{r}
+# Projeção do vetor X44 em e1
+prj.e1 <- as.vector((t(x44)%*%e1))*e1
+prj.e1
+
+# gráfico base
+plot(Xc[pontos, ], xlim = lim.x, ylim = lim.y, type = 'n', asp = 1)
+
+# vetores originais
+arrows(0, 0,
+       Xc[pontos,1], Xc[pontos,2],
+       length = 0.15, angle = 15,
+       col = c("red", "blue", "green", "purple"))
+
+# rótulos
+text(Xc[pontos,1], Xc[pontos,2],
+     labels = pontos, pos = 3)
+
+# eixos
+abline(h = 0, v = 0)
+
+# base nova
+k <- 0.5
+arrows(0, 0,
+       c(e1[1], e2[1])*k,
+       c(e1[2], e2[2])*k,
+       col = "black", length = 0.25)
+
+text(c(e1[1], e2[1])*k,
+     c(e1[2], e2[2])*k,
+     labels = c("e1", "e2"),
+     pos = 4, font = 2)
+```
+
+##### Projeções do ponto 44
+
+```{r}
+
+  # Projeção do vetor X44 em e2
+prj.e2 <- as.vector((t(x44)%*%e2))*e2
+prj.e2
+
+# gráfico base
+plot(Xc[pontos, ], xlim = lim.x, ylim = lim.y, type = 'n', asp = 1)
+
+# vetores originais
+arrows(0, 0,
+       Xc[pontos,1], Xc[pontos,2],
+       length = 0.15, angle = 15,
+       col = c("red", "blue", "green", "purple"))
+
+# rótulos
+text(Xc[pontos,1], Xc[pontos,2],
+     labels = pontos, pos = 3)
+
+# eixos
+abline(h = 0, v = 0)
+
+# projeção em e1
+segments(0, 0, prj.e1[1], prj.e1[2],
+         col = "red", lwd = 2)
+
+segments(x44[1], x44[2],
+         prj.e1[1], prj.e1[2],
+         lty = 2)
+
+# projeção em e2
+
+segments(x0 = 0, y0 = 0, x1 = prj.e2[1], y1 = prj.e2[2], 
+        col = 'red', lwd = 2)
+
+segments(x0 = x44[1], y0 = x44[2], x1 = prj.e2[1], y1 = prj.e2[2],
+        lty = 2)
+
+```
+
+Comentário:
+As projeções representam as coordenadas do vetor na nova base.
+
+```{r}
+# junta tudo que aparece no gráfico
+todos_pontos <- rbind(
+  Xc[pontos, ],
+  prj123.e1,
+  prj123.e2
+)
+
+# limite simétrico
+lim <- max(abs(todos_pontos)) * 0.7
+
+# gráfico base ajustado
+plot(Xc[pontos, ],
+     xlim = c(-lim, lim),
+     ylim = c(-lim, lim),
+     type = 'n',
+     asp = 1)
+
+# vetores originais
+arrows(0, 0,
+       Xc[pontos,1], Xc[pontos,2],
+       length = 0.15, angle = 15,
+       col = c("red", "blue", "green", "purple"))
+
+# rótulos
+text(Xc[pontos,1], Xc[pontos,2],
+     labels = pontos, pos = 3)
+
+# eixos
+abline(h = 0, v = 0)
+
+# base (e1 e e2)
+k <- 0.5
+arrows(0, 0,
+       c(e1[1], e2[1])*k,
+       c(e1[2], e2[2])*k,
+       col = "black", length = 0.25)
+
+text(c(e1[1], e2[1])*k,
+     c(e1[2], e2[2])*k,
+     labels = c("e1", "e2"),
+     pos = 4, font = 2)
+
+# projeção em e1
+segments(0, 0,
+         prj123.e1[1], prj123.e1[2],
+         col = "red", lwd = 2)
+
+segments(x123[1], x123[2],
+         prj123.e1[1], prj123.e1[2],
+         lty = 2)
+
+# projeção em e2
+segments(0, 0,
+         prj123.e2[1], prj123.e2[2],
+         col = "red", lwd = 2)
+
+segments(x123[1], x123[2],
+         prj123.e2[1], prj123.e2[2],
+         lty = 2)
+```
+
+#### Mudança de base
+
+```{r}
+#matriz de transformação
+W <- matrix(c(1, 1, -1, 1)*sqrt(2)/2, ncol = 2, byrow = FALSE)
+
+# novas coordenadas
+Yp <- Xp %*% W
+rownames(Yp) <- pontos
+Yp
+```
+
+Comentário:
+As novas coordenadas são combinações lineares das variáveis originais.
+
+### Transformação de todos os pontos
+
+```{r}
+# nova representação para todos os dados
+Y <- Xc %*% W
+
+head(Y)
+```
+
+### Código para o iris inteiro no novo sistema
+
+```{r}
+# 1. dados completos
+X <- iris[, 1:4]
+
+# 2. centralizar
+Xc <- scale(X, center = TRUE, scale = FALSE)
+
+# 3. matriz de rotação 2D (45°)
+R2 <- matrix(c(1, 1,
+               -1, 1)*sqrt(2)/2, ncol = 2, byrow = FALSE)
+
+# 4. matriz de rotação 4D (bloco diagonal)
+W <- matrix(0, nrow = 4, ncol = 4)
+
+W[1:2, 1:2] <- R2   # sepal
+W[3:4, 3:4] <- R2   # petal
+
+# 5. transformação
+Y <- Xc %*% W
+
+# 6. visualizar
+head(Y)
+
+cores <- c("red", "green", "blue")
+
+plot(Y[,3], Y[,4],
+     col = cores[as.numeric(iris$Species)],
+     pch = 19,
+     asp = 1,
+     xlab = "Petal - eixo 1 (45°)",
+     ylab = "Petal - eixo 2 (45°)")
+
+abline(h = 0, v = 0, lty = 2)
+```
+
