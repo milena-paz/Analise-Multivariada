@@ -1,0 +1,107 @@
+---
+title: "Normal Multivariada"
+author: "Milena Paz Freitas"
+date: "2026-05-14"
+output: html_document
+---
+
+:::{.hidden}
+$$
+\newcommand{\bm}{\boldsymbol}
+\newcommand{\m}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\bx}{\boldsymbol x}
+$$
+:::
+
+# Definição
+
+ $\bm X \sim N_p(\bm{\mu}, \Sigma_x)$. Então a fdp conjunta é dada por:
+ $$f_x(x,\bm\mu,\Sigma_x)= \frac{1}{(2\pi)^{p/2}|\Sigma_x|^{1/2}}\exp\{1/2(x-\bm\mu)'\Sigma_x^{-1}(x-\bm\mu)\}$$
+
+A padronização de um vetor $\bm X$ é dada por $\bm Z = (Z_1,...,Z_p)$, onde:
+$$\bm Z=V^{-1/2}(\bm X-\bm\mu),$$
+e $V=\text{diag}(\text{diag}(\Sigma_x))=\text{diag}(\sigma_{11},...,\sigma_{pp})$.
+
+* $\bm{\mu_Z}=\bm 0$;
+
+* $\text{Cov}(\bm Z)=P$, onde $P$ é a matriz de correlações de $\bm X$.
+
+### Resultado 1
+
+Sejam $\bm X \sim N_p(\bm{\mu}, \Sigma)$, $\bm a$ um vetor p-dimensional de constantes e $A$ uma matriz mxp de ctes. Então:
+
+i. $\bm a'\bm X\sim N(\bm a'\bm\mu,\bm a'\Sigma\bm a)$;
+
+ii. $\bm X +\bm a\sim N_p(\bm{\mu}+\bm a, \Sigma)$;
+
+iii. $A\bm X\sim N_m(A\bm\mu,A\Sigma A')$
+
+### Resultado 2
+
+$\bm X=\m{\bm X^{(1)}\\ \hdashline \bm X^{(2)}}\sim N_p(\bm{\mu}, \Sigma)$, onde $\bm X^{(1)}$ é mx1 e $\bm X^{(2)}$ é qx1, tal que $m+q=p$. Assuma que:
+
+$$
+\bm\mu= \m{\bm\mu_1\\\hdashline\bm\mu_2},\quad\Sigma=\m{\Sigma_{12}&\Sigma_{12}\\\Sigma_{12}&\Sigma_{12}}
+$$
+
+Temos que:
+
+1. $\text{Cov}(\bm X^{(1)},\bm X^{(2)})=\Sigma_{12}=\Sigma_{21}'$. Se $\Sigma_{12}$ for matriz de zeros, então as partições são independentes (isso se aplica apenas no caso normal).
+
+2. A distribuição condicional de $X^{(1)}$, dado $X^{(2)}=\bm x_2$ é normal m-variada, com parâmetros:
+
+$$
+\text{E}(\bm X^{(1)}|\bm X^{(2)}=\bm x_2)=\bm\mu_1+\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}
+$$
+
+$$
+\text{Cov}(\bm X^{(1)}|\bm X^{(2)}=\bm x_2)=\Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}
+$$
+
+### Resultado 3
+
+Seja $\bm X \sim N_p(\bm{\mu}, \Sigma)$, com $|\Sigma|>0$, então:
+
+i. $(\bm X-\bm\mu)'\Sigma^{-1}(\bm X-\bm\mu)\sim \chi_p^2$
+
+ii. Sejam $\bm e_i$ e $\lambda_i$, $i=1,\dots,p.$, os autovetores unitários e autovalores de $\Sigma$, com $\lambda_1\geq...\geq\lambda_p$. Então as curvas de nível da fdp de $\bm X$ são hiperelipsóides satisfazendo $(\bm X-\bm\mu)'\Sigma^{-1}(\bm X-\bm\mu)=k^2$, com centro em $\bm\mu$ e eixos dados $\pm k\sqrt\lambda_i\bm e_i$
+
+#### Distância
+$(\bm X-\bm\mu)'W(\bm X-\bm\mu)\sim \chi_p^2$, onde $W$ é a matriz de ponderação. Essa medida de distância pode ser:
+
+* Distância euclideana ao quadrado, se $W=I$;
+
+* Distância de Mahalanobis ao quadrado, se $W=\Sigma^{-1}$.
+
+# Amostra
+
+## Distribuição amostral de $\bar{\bm X}$ e $S$
+
+Seja $\bx_1,...,\bx_n$ a.a. de população normal p-variada com média $\mu$ e matriz de covariâncias $\Sigma$. Então:
+
+$$
+\bar{\bm X}\sim N_p\left(\bm{\mu}, \frac{1}{n}\Sigma\right)
+$$
+
+Digamos que $\bm z_i$ seja a observação $\bx_i$ padronizada. $R=\sum^p_{i=1}\bm z_i\bm z_i'\sim \text{Wishart}$ com p graus de liberdade. Ou seja:
+
+$$
+(n-1)S\sim \text{Wishart}_{(n-1)}
+$$
+
+$S$ e $\bar{\bm X}$ são independentes.
+
+## Teorema Central do Limite
+
+Seja $\bx_1,...,\bx_n$ a.a. de população normal p-variada com média $\mu$ e matriz de covariâncias $\Sigma$ finita, desconhecidos. Então:
+
+$$
+\sqrt n(\bm{\bar X}-\bm\mu)\overset{d}\rightarrow N_p(0,\Sigma)
+$$
+
+para amostras suficientemente grandes e $n>>p$.
+
+$$
+n(\bm X-\bm\mu)'A^{-1}(\bm X-\bm\mu)\overset{d}\rightarrow \chi^2_p,
+$$
+onde $A$ é $S$ ou $\Sigma$, de qualquer forma converge para $n$ grande e $n>>p$.
