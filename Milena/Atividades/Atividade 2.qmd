@@ -1,0 +1,505 @@
+---
+title: "Atividade 2 - PCA"
+author: "Milena Paz Freitas"
+subtitle: "Análise Multivariada - 2026.1"
+format: html
+page-layout: full
+lang: pt-BR
+title-block-banner: true
+title-block-style: manuscript
+embed-resources: true
+editor: source
+theme: sandstone
+bibliography: "ref.bib"
+callout-appearance: "minimal"
+toc: true
+toc-expand: true
+csl: abnt.csl
+---
+
+::: {.hidden}
+$$
+\newcommand{\inv}{^{-1}}
+\newcommand{\bm}[1]{\boldsymbol{#1}}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\E}{\text{E}}
+\newcommand{\cov}{\text{Cov}}
+$$
+:::
+
+Este documento apresenta as resoluções dos
+exercícios propostos -- em grande parte do livro de @johnson2002, *Applied multivariate statistical analysis* -- que foram realizados com o objetivo de compreender o processo de análise de componentes principais e a álgebra linear por trás do mesmo.
+
+# Exercícios
+
+## Questão 1
+
+::: {.callout-note}
+# Enunciado
+
+Os dados do arquivo `solo.txt` são observações de uma amostra aleatória
+constituída de 20 amostras de um determinado solo. Para cada amostra foram
+medidas as percentagens de areia, sedimentos, argila, quantidade de material
+orgânico e a acidez do solo (pH). Observe que as porcentagens de areia, sedimentos
+e argila somam 100%.
+
+a) Calcule a matriz de covariância amostral S e a decomponha em seus autovalores.
+Mostre que a partir daí que esta matriz é não negativa definida.
+
+b) Calcule os autovetores normalizados e calcule as componentes principais
+amostrais. Qual é a consequência de a) nas componentes que você construiu?
+
+c) Escolha uma estratégia para tornar a matriz S positiva definida. Explique sua
+estratégia.
+
+d) Faça agora uma análise de componentes principais usando a matriz positiva
+definida que você encontrou em c). Interprete as componentes e faça uma
+análise dizendo quantas componentes deveriam ser retidas para explicar
+aproximadamente a estrutura de variabilidade das variáveis originais. Calcule as
+correlações das componentes que você decidiu reter no sistema com todas as
+variáveis originais.
+
+e) Para cada componente que você eliminou em d) teste a hipótese de que o
+autovalor teórico correspondente à componente é igual a zero.
+
+f) Escolha a componente que achar mais conveniente para comparar as 20
+amostras de solo entre si. Calcule o escore da componente para cada uma das
+vinte observações. Faça uma análise destes escores e tire alguma conclusão.
+
+g) Faça agora uma análise de componentes principais usando a matriz de
+correlação amostral R calculada a partir da matriz positiva definida do item c).
+Compare os resultados com aqueles encontrados em d).
+
+h) Repita o item f) considerando a análise que você fez em g).
+:::
+
+```{r}
+x <- as.matrix(read.table("solo.txt",header=T,dec=",",row.names = 1))
+S <- cov(x)
+S.eig <- eigen(S)
+lambda <- S.eig$values
+lambda #lambda 5 é zero, muito pequeno.
+```
+
+Como os autovalores da matriz S são tais que $\lambda_1\geq...\geq\lambda_5\geq0$, temos que a matriz S é positiva semidefinida. Seus autovetores então são obtidos:
+
+```{r}
+E <- S.eig$vectors
+#Componentes principais
+Y <- x%*%E
+```
+
+Como a matriz S tem autovalores maiores ou iguais a zero, temos que a representação dos dados por meio de componentes principais é possível e coerente, já que os autovalores em questão são a variância explicada pelas componentes $Var(\boldsymbol Y_i)$ (e variância não pode ser negativa). A componente que corresponde ao autovalor nulo costuma ser insignificante. O que acontece é que, como as porcentagens de areia, sedimentos e argila somam 100%, uma variável é totalmente dependente das outras duas (colinearidade). Assim, uma estratégia para tornar a matriz S positiva definida seria simplesmente retirar uma das três variáveis, que ficaria como valor implícito. No R:
+
+```{r}
+S <- cov(x[,-3])
+S.eig <- eigen(S)
+lambda <- S.eig$values
+lambda
+E <- S.eig$vectors
+```
+
+Isso, porém, ocasiona na perda de interpretabilidade das componentes. Como todos os autovalores são positivos e não-nulos, $S$ é positiva definida. Faremos, então, uma ACP usando essa matriz:
+
+```{r}
+par(mar=c(4.1,4.1,2,1))
+#dados centrados
+xc <- scale(x,scale=F)
+#escores centrados
+Y <- xc[,-3]%*%E
+screeplot(list(sdev=sqrt(lambda)),type='l')
+perc <- lambda/sum(lambda)*100
+tabela.val <- cbind(round(lambda,3),round(perc,2),round(cumsum(perc),1))
+rownames(tabela.val) <- paste0("Comp",1:4)
+colnames(tabela.val)  <- c("Autovalor","% Variância","% Acumulada")
+tabela.val
+```
+
+Buscando o "cotovelo" no screeplot, temos que duas componentes descrevem grande parte da variância, o que é confirmado pela tabela acima. Aqui temos a contribuição da cada variável a cada componente:
+
+```{r}
+V.meioinv <- diag(1/sqrt(diag(S)))
+Lambda.meio <-diag(sqrt(lambda))
+# matriz de correlacao entre Componente(i) e Variavel(k)
+cor.YX<-V.meioinv%*%E%*%Lambda.meio
+colnames(cor.YX) <- paste0("Comp",1:4)
+rownames(cor.YX)  <- colnames(x)[-3]
+#quantos % da variável está em cada componente?
+round(cor.YX^2,5)*100
+## Graficamente
+biplot(Y,E[,1:2],ylabs=colnames(x)[-3],
+       xlab=expression(Y[1](98.32*'%')),ylab=expression(Y[2](1.36*'%')))
+```
+
+Daqui podemos observar que a variável ph é mal representada pelas 3 primeiras componentes. Interpretativamente, podemos dizer que as primeiras duas componentes representam bem as medidas concentração de areia e sedimentos; graficamente temos que os dois vetores se configuram quase ortogonais entre si.
+
+Neste caso, é interessante reter a primeira componente, de forma que informe bem sobre as concentrações de materiais inorgânicos do solo. Podemos comparar com a saída da função do R `prcomp`:
+
+```{r}
+pc <- prcomp(x[,-3],scale.=F)
+#autovalores
+rbind(lambda,pc$sdev**2)|> round(9)
+#autovetores
+E
+pc$rotation
+#gráfico
+```
+
+A matriz de rotação de `prcomp` é $-E$, mudando apenas o sentido de rotação.
+
+Vamos analisar os escores para a primeira componente:
+
+```{r}
+sort(Y[,1])
+```
+
+As observações mais positivas indicam maior concentração de areia. Aquelas mais próximas de zero nesta  componente têm maior presença de argila e/ou material orgânico. 
+
+Agora, usando matriz de correlações no lugar da de covariância, realizamos novamente uma ACP:
+
+```{r}
+R <- V.meioinv%*%S%*%V.meioinv
+R.eig <- eigen(R)
+lambda <- R.eig$values
+E <- R.eig$vectors
+lambda
+```
+
+Espera-se que essa análise represente melhor as variáveis, pois reduz o efeito de diferença de escala entre os dados (especialmente apara pH, que segue escala logarítmica e foi muito mal representada na primeira análise).
+
+```{r}
+par(mar=c(4.1,4.1,2,1))
+screeplot(list(sdev=sqrt(lambda)),type='l')
+perc <- lambda/sum(lambda)*100
+tabela.val <- cbind(round(lambda,3),round(perc,2),round(cumsum(perc),1))
+rownames(tabela.val) <- paste0("Comp",1:4)
+colnames(tabela.val)  <- c("Autovalor","% Variância","% Acumulada")
+tabela.val
+##escores
+xp <- scale(x[,-3])
+Y <- xp%*%E
+##
+Lambda.meio <-diag(sqrt(lambda))
+# matriz de correlacao entre Componente(i) e Variavel(k)
+#V.meioinv é identidade por R ser matriz de correlacoes
+cor.YX<-E%*%Lambda.meio
+colnames(cor.YX) <- paste0("Comp",1:4)
+rownames(cor.YX)  <- colnames(xp)
+#quantos % da variável está em cada componente?
+round(cor.YX^2,5)*100
+## Graficamente
+biplot(Y,E[,1:2],ylabs=colnames(xp),
+       xlab=bquote(Y[1](.(round(perc[1],2))*'%')),
+       ylab=bquote(Y[2](.(round(perc[2],2))*'%')))
+```
+
+Destes resultados podemos ver que as primeiras duas componentes representam bem melhor as variáveis que antes não estavam visíveis. Podemos associar, de certa forma, que o eixo da segunda componente corresponde à quantidade de material organico no sentido positivo e acidez no negativo (já que pH mais baixo é mais ácido). A componente 1 continua descrevendo principalmente as variáveis areia e sedimentos.
+
+Observemos os escores:
+
+```{r}
+Y[,2]
+```
+
+Solos como 14, 12 são solos mais básicos e com alto teor de material orgânico. Solos como 7, 19, 6 e 18 são de maiores concentrações de areia e menores de sedimentos.
+
+Assim, temos que as componentes representam:
+
+$Y_1$: Concentração de areia vs Outros materiais (não-organicos)
+
+$Y_2$: Quantidade de material orgânico e basicidade.
+
+## Questão 2
+
+::: {.callout-note}
+# Enunciado
+
+Sejam $Y_i$, a i-ésima componente principal; $X_k$, a k-ésima variável e ($\lambda_i, \bm{e}_i$) o i-ésimo
+par de autovalores/autovetores da matriz de covariâncias $\Sigma$. Mostre que:
+
+$$
+\text{Cor}(Y_i,X_k)=\frac{e_{ik}\sqrt\lambda_i}{\sqrt{\sigma_{kk}}},\quad i,k=1,2,...,p.
+$$
+:::
+
+Basear-se na lista 1
+
+Por definição:
+
+$$
+\text{Cor}(Y_i,X_k)=\frac{\cov(Y_i,X_k)}{\sqrt{\sigma_{kk}Var(Y_i)}}
+$$
+
+Tomando em conta que $Y_i=\bm e_i'X$ e $X_k=\bm a'X$, onde $\bm a$ é um vetor nulo, exceto pelo k-ésimo elemento que é igual a 1. Assim, usando propriedades de combinações lineares, a matriz de covariâncias:
+
+$$
+\cov(\bm W)=\cov[(\bm e_i'X,\bm a'X)']=A\Sigma A',\quad A=\mat{\bm e_i'\\\bm a'}.
+$$
+$$
+\Rightarrow A\Sigma A'=A\mat{\lambda_i\bm e_i& \bm\sigma_k},
+\text{ onde } \bm\sigma_k\text{ é a k-ésima coluna de }\Sigma.
+$$
+
+$$
+\Rightarrow A\Sigma A'=\mat{\lambda_i\bm{e_i}'\bm{e_i}&\lambda_ie_{ik}\\
+\lambda_ie_{ik}&\sigma_{kk}}=\mat{\lambda_i&\lambda_ie_{ik}\\
+\lambda_ie_{ik}&\sigma_{kk}}
+$$
+Dessa matriz, temos que $\cov(\bm e_iX,\bm aX)=\lambda_ie_{ik}$. Além disso, sabemos que $Var(Y_i)=\lambda_i$:
+
+$$
+\Rightarrow\text{Cor}(Y_i,X_k)=\frac{\lambda_ie_{ik}}{\sqrt{\sigma_{kk}\lambda_i}}=
+\frac{\lambda_ie_{ik}\sqrt\lambda_i}{\sqrt{\sigma_{kk}}\lambda_i}=\frac{e_{ik}\sqrt\lambda_i}{\sqrt{\sigma_{kk}}}
+$$
+
+## Questão 3
+
+:::{.callout-note}
+# Enunciado
+
+(JOHNSON; WICHERN, 2007: exercícios 8.1 e 8.2, pág. 470). Seja a matriz de
+covariâncias $\Sigma$:
+
+$$
+\Sigma=\mat{5&2\\2&2}
+$$
+
+a) Determine as componentes principais populacionais $Y_1$ e $Y_2$ para a matriz $\Sigma$.
+
+b) Calcule a proporção de variância populacional total explicada pela primeira
+componente.
+
+c) Converta a matriz de covariância $\Sigma$ para a matriz de correlações $\bm P$.
+
+d) Determine as componentes principais de $\bm P$, $Y_1$ e $Y_2$, e calcule a proporção de
+variância populacional total explicada por $Y_1$.
+
+e) Compare as componentes principais calculada em d) com aquelas obtidas em a). Elas são as mesmas? Elas deveriam ser as mesmas?
+
+f) Calcule as correlações entre $Y_1$ e $Z_1$, $Y_1$ e $Z_2$, $Y_2$ e $Z_1$.
+:::
+
+Os autovalores $\lambda_1$ e $\lambda_2$ são obtidos como solução da equação:
+
+$$
+|\Sigma-\lambda I|=0 \Rightarrow \begin{vmatrix} 5-\lambda & 2\\2 &2-\lambda
+\end{vmatrix} =0
+$$
+
+E seus respectivos autovetores são solucão de:
+
+$$
+(\Sigma - \lambda)\bm x=\bm0
+$$
+
+No R, fazemos:
+
+```{r}
+Sigma <- matrix(c(5,2,2,2),ncol=2)
+S.eig <- eigen(Sigma)
+(E <- S.eig$vectors)
+(lambda <- S.eig$values)
+```
+
+As componentes são dadas por $Y=XE$, onde $E$ é a matriz cujas colunas são os autovetores de $\Sigma$ e X é a matriz de dados (nx2). A proporção de variância explicada pela primeira componente é:
+
+```{r}
+lambda[1]/sum(lambda)
+```
+
+Ou seja, cerca de 51% da variância é explicada pela primeira componente. Para converter a matriz $\Sigma$ em uma matriz de correlações, basta obter a matriz $V^{-1/2}$, que é dada pela matriz diagonal cujos elementos da diagonal principal são o inverso dos desvios padrão. Em seguida, realiza-se a operação: $\bm P=V^{-1/2}SV^{-1/2}$
+
+```{r}
+V.meioinv <- diag(1/sqrt(diag(Sigma)))
+(P <- V.meioinv%*%Sigma%*%V.meioinv)
+```
+
+Para fazer as componentes principais de $\bm P$, realizamos as mesmas operações, mas substituindo $\Sigma$ por $\bm P$:
+
+```{r}
+P.eig <- eigen(P)
+(E <- P.eig$vectors)
+(lambda <- P.eig$values)
+```
+
+Aqui, temos que as componentes são dadas pela mesma operação, porém para as variáveis $Z$, que correspondem à padronização das variávels $X$, assim: $Y=ZE$. A proporção de variância explicada pela primeira componente é:
+
+```{r}
+lambda[1]/sum(lambda)
+```
+
+Ou seja, ela explica cerca de 82% da variância populacional total. Assim, temos que a padronização nivelou a escala de forma que, nas componentes, as variáveis contribuíssem igualmente. As correlações entre $Y$ e $Z$ são dadas por:
+
+```{r}
+Lambda.meio <- diag(sqrt(lambda))
+cor.YZ<-E%*%Lambda.meio
+colnames(cor.YZ) <- paste0("Y",1:2)
+rownames(cor.YZ) <- paste0("Z",1:2)
+cor.YZ
+```
+
+## Questão 4
+
+:::{.callout-note}
+# Enunciado
+
+(JOHNSON; WICHERN, 2007: exercício 8.3, pág. 471). Seja a matriz de
+covariâncias:
+
+$$
+\Sigma=\mat{2&0&0\\0&4&0\\0&0&4}
+$$
+
+a) Determine as componentes principais populacionais $Y_1$, $Y_2$ e $Y_3$ para a matriz $\Sigma$.
+
+b) Comente sobre os autovetores (e componentes principais) associados com os
+autovalores que não são distintos
+:::
+
+Primeiro encontraremos os autovalores e autovetores de $\Sigma$:
+
+```{r}
+Sigma <- diag(c(2,4,4))
+S.eig <- eigen(Sigma)
+(E <- S.eig$vectors)
+(lambda <- S.eig$values)
+```
+
+Assim, as componentes são dadas pelas combinações lineares dadas pela operação $Y=XE$. Desta forma, como os autovetores correspondentes a $\lambda=4$ não são únicos e, caso seja feita uma análise dessas componentes, é necessário evitar uma das duas.
+
+## Questão 5
+
+:::{.callout-note}
+# Enunciado
+
+(JOHNSON; WICHERN, 2007: exercício 8.10, pág. 473). O arquivo T8-4.dat
+contém as taxas de retorno semanais das ações de cinco empresas negociadas na
+New York Stock Exchange. No contexto dessa questão, define-se taxa de retorno
+semanal como: (preço de fechamento na semana atual – preço de fechamento na
+semana anterior)/preço de fechamento na semana anterior.
+
+a) Construa a matriz de covariâncias amostrais S e encontre suas componentes
+principais.
+
+b) Determine a proporção de variância amostral explicada pelas três primeiras
+componentes principais. Interprete essas componentes principais.
+
+c) Construa os intervalos simultâneos de Bonferroni, com 90% de confiança para
+as variâncias $\lambda_1$, $\lambda_2$ e $\lambda_3$ das três primeiras componentes populacionais Y1, Y2 e
+Y3.
+
+d) Considerando os resultados obtidos em a), b) e c), você considera que os dados
+das taxa de retorno desses ativos podem ser resumidas em menos que cinco
+dimensões? Comente
+:::
+
+```{r}
+x <- as.matrix(read.table("T8-4.DAT",
+                col.names = c("JP Morgan","Citibank","Wells Fargo",
+                              "Royal Dutch Shell","Exxon Mobil")))
+S <- cov(x)
+S.eig <- eigen(S)
+(E <- S.eig$vectors)
+(lambda <- S.eig$values)
+###componentes
+Y <- x%*%E
+```
+
+Assim, as proporções de variância explicada pelas primeiras 3 componentes são:
+
+```{r}
+#proporcoes
+(lambda[1:3]/sum(lambda))|>round(3)
+#acumuladas
+cumsum((lambda[1:3]/sum(lambda)))
+```
+
+A primeira componente é mais associada aos retornos de Royal Dutch Shell e Exxon Mobil, enquanto a segunda é associada às demais, no sentido negativo. A terceira componente coloca as ações mencionadas e, direções opostas, assim como a JP Morgan e Citibank. Assim, como o primeiro autovetor tem elementos positivos para todas as ações, a primeira componente pode ser interpretada como Mercado. A segunda associa as ações petrolíficas (Shell, Exxon Mobil) em direção oposta de empresas do ramo financeiro (as demais). A terceira é um tanto difícil de interpretar.
+
+Faremos, agora, um intervalo de 90% de confiança de Bonferroni para os três primeiros autovalores obtidos de S:
+
+```{r}
+ic <- sapply(lambda,function(l)  l/(1+c(1,-1)*qnorm(0.05/3)))
+rownames(ic) <- c("Infer.","Super.")
+colnames(ic) <- paste0("lambda",1:5)
+ic
+```
+
+Por fim, como temos uma interpretação decente e representação de 80% da variância amostral para duas componentes, é sim possível resumir os dados com apenas as duas primeiras componentes.
+
+## Questão 6
+
+:::{.callout-note}
+# Enunciado
+
+ (JOHNSON; WICHERN, 2007: exercício 8.11, pág. 474). Considere os dados
+referentes a 61 setores censitários, disponíveis no arquivo T8-5.dat.
+
+a) As observações em $X_5$ foram registradas em dezenas de milhares, em vez de
+centenas de milhares de dólares; isto é, corrija os valores, multiplicando por dez,
+todos os números listados na última coluna do conjunto de dados.
+
+b) Construa a matriz de covariâncias amostrais S para os dados de setores censitários
+quando a variável $X_5$: valor mediano de residência é medido em dez mil
+unidades monetárias.
+
+c) Obtenha os pares de autovalores/autovetores e as duas primeiras componentes
+principais amostrais para a matriz de covariâncias obtida em (a).
+
+d) Calcule a proporção de variância total explicada pelas duas primeiras
+componentes principais obtidas em (c).
+
+e) Calcule os coeficientes de correlação entre as variáveis e as componentes.
+
+f) Se possível, interprete essas componentes. Compare seus resultados com aqueles
+obtidos no Exemplo 8.3. O que pode ser afirmado sobre os efeitos dessa
+mudança de escala, nas componentes principais?
+
+:::
+
+Primeiramente, corrigiremos a escala de $X_5$ e obteremos a matriz de covariâncias:
+
+```{r}
+x <- as.matrix(read.table("T8-5.DAT", col.names=c("POP","GRAD","EMP","PUB","VAL")))
+x[,5] <- x[,5]*10
+(S <- cov(x))|> round(3)
+```
+
+Agora obteremos as componentes principais dessa matriz, fazendo:
+
+```{r}
+S.eig <- eigen(S)
+#valores
+(lambda <- S.eig$values)
+#vetores
+(E <- S.eig$vectors)
+Y <- x%*%E
+#duas primeiras
+head(Y[,1:2])
+```
+
+Faremos uma tabela contendo a porcentagem de variância total explicada pelas componentes:
+
+```{r}
+perc <- lambda/sum(lambda)*100
+tabela.val <- cbind(round(lambda,3),round(perc,2),round(cumsum(perc),1))
+rownames(tabela.val) <- paste0("Comp",1:5)
+colnames(tabela.val)  <- c("Autovalor","% Variância","% Acumulada")
+tabela.val
+```
+
+As primeiras duas, juntas, explicam cerca de 80% da variância total. Iremos calcular os coeficientes de correlação entre as duas primeiras componentes e as variáveis originais:
+
+```{r}
+V.meioinv <- diag(1/sqrt(diag(S)))
+Lambda.meio <-diag(sqrt(lambda))
+# matriz de correlacao entre Componente(i) e Variavel(k)
+cor.YX<-V.meioinv%*%E%*%Lambda.meio
+colnames(cor.YX) <- paste0("Y",1:5)
+rownames(cor.YX)  <- colnames(x)
+#duas primeiras
+cor.YX[,1:2]
+```
+
+A primeira componente, que envolve principalmente as variáveis Funcionários públicos e Empregados em direções opostas, pode ser interpretada como um contraste entre essas duas formas de emprego. A segunda componente envolve Profissionais graduados, Empregados e o Valor Mediano de Residência; assim, podemos interpretá-la como uma medida de produtividade. Em comparação com o exemplo do livro, a mudança de escala não parece ter surtido grande efeito na primeira, mas sim na segunda componente: a variável de VAL é muito mais proeminente.
+
