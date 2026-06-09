@@ -145,7 +145,15 @@ pc$rotation
 #gráfico
 ```
 
-A matriz de rotação de `prcomp` é $-E$, mudando apenas o sentido de rotação.
+A matriz de rotação de `prcomp` é $-E$, mudando apenas o sentido de rotação. Para testar se os autovalores das componentes exclúidas são iguais a zero, assintoticamente fazemos um intervalo de 95% de confiança:
+
+```{r}
+ic<- sapply(lambda[3:4],function(l) l/(1+c(-1,1)*qnorm(0.025)*sqrt(2/20)))
+dimnames(ic) <- list(c("inferior","superior"),c("lambda3","lambda4"))
+ic
+```
+
+Assim, como 0 não está incluso nos intervalos rejeitamos a hipótese nula para ambos. Porém, devido ao pequeno tamanho de amostra, o teste não é 100% confiável.
 
 Vamos analisar os escores para a primeira componente:
 
@@ -503,3 +511,226 @@ cor.YX[,1:2]
 
 A primeira componente, que envolve principalmente as variáveis Funcionários públicos e Empregados em direções opostas, pode ser interpretada como um contraste entre essas duas formas de emprego. A segunda componente envolve Profissionais graduados, Empregados e o Valor Mediano de Residência; assim, podemos interpretá-la como uma medida de produtividade. Em comparação com o exemplo do livro, a mudança de escala não parece ter surtido grande efeito na primeira, mas sim na segunda componente: a variável de VAL é muito mais proeminente.
 
+## Questão 7
+
+:::{.callout-note}
+# Enunciado
+
+(JOHNSON; WICHERN, 2007: exercícios 8.18 e 8.19, pág. 476). O conjunto de
+dados disponível no arquivo T1-9.dat refere-se a recordes mundiais femininos
+em corridas. (Fonte: IAAF/ATFS Track and Field Handbook for Helsinki 2005).
+
+a) Obtenha a matriz de correlações R para esses dados e determine seus autovalores
+e autovetores.
+
+b) Determine as duas primeiras componentes principais para as variáveis
+padronizadas. Construa uma tabela mostrando as correlações das variáveis
+padronizadas com as correlações e a porcentagem acumulada de variância
+amostral total (padronizada) explicada por essas duas componentes.
+
+c) Interprete as duas componentes principais obtidas em (b). (Note que a primeira
+componente é essencialmente um vetor unitário normalizado e poderia medir a
+excelência atlética de um determinado país. O segundo componente poderia
+
+medir a força da relação de um país nas várias distâncias de corrida.)
+d) Classifique os países baseando-se em seus escores da primeira componente
+principal. Essa classificação corresponde à sua intuição sobre a excelência
+atlética em corridas dos países analisados?
+
+e) Converta os recordes nacionais em corridas para velocidade, medidas em metros
+por segundo. Lembre-se que, no conjunto de dados, os recordes para 800 m,
+1500 m, 3000m e maratona são dados em minutos. A Federação Internacional de
+Atletismo padronizou a distância de uma maratona em 42,195 quilômetros.
+
+f) Conduza uma análise de componentes principais usando a matriz de
+covariâncias S dos dados de velocidade. Compare os resultados com aqueles
+obtidos no item (b). Suas interpretações das componentes são diferentes
+daquelas efetuadas no item (c)?
+
+g) Se os países forem classificados com base em seu escore na primeira
+componente principal (obtidas a partir dos dados de velocidade). Essa
+classificação difere daquela obtida no item (d).
+
+h) Qual análise você prefere? Por quê?
+:::
+
+Primeiramente, encontraremos a matriz de correlações do conjunto de dados e seus respectivos autovalores e autovetores:
+
+```{r}
+x <- as.matrix(read.table("T1-9.DAT",row.names = 1,
+                col.names=c("País","m100","m200","m400",
+                            "m800","m1500","m3000","Mrtn")))
+xp <- scale(x)
+# a variável x1: país será usada como identificadora apenas
+(R <- cor(x))|>round(3)
+R.eig <- eigen(R)
+#valores
+(lambda <- R.eig$values)|>round(4)
+#vetores
+(E <- R.eig$vectors)|>round(4)
+#componentes
+Y <- xp%*%E
+```
+
+Montaremos, também, uma tabela com a variância total (padronizada) explicada pelas componentes:
+
+```{r}
+perc <- lambda/sum(lambda)*100
+tabela.val <- cbind(round(lambda,3),round(perc,2),round(cumsum(perc),1))
+rownames(tabela.val) <- paste0("Comp",1:7)
+colnames(tabela.val)  <- c("Autovalor","% Variância","% Acumulada")
+tabela.val
+```
+
+A primeira componente põe peso semelhante à todas as variáveis, sendo equivalente a uma medida de excelência atlética geral nas corridas. A segunda componente contrasta explosão vs. resistência, colocando as corridas mais curtas em um sentido e as mais longas em outro.
+
+Aqui seguem as classificações dos países de acordo com a primeira componente, do maior para o menor:
+
+```{r}
+clas <- 1:nrow(x)
+#decreasing=T pois quanto maior o tempo pior a performance
+names(clas) <- names(sort(Y[,1],decreasing=T))
+clas
+```
+
+Esses *rankings* parecem ser consistentes com a noção de excelência atlética atribuída à componente.
+
+Agora, faremos uma mudança no conjunto de dados para que todas as medidas sejam em segundos:
+
+```{r}
+x[,4:7] <- x[,4:7]*60
+```
+
+E converteremos os tempos em velocidades médias(m/s), considerando a distância de 42.195km para a maratona:
+
+```{r}
+dist <- c(100,200,400,800,1500,3000,42195)
+vel <- (1/x)%*%diag(dist)
+```
+
+Usando esse novo conjunto de dados, faremos uma outra ACP:
+
+```{r}
+R <- cor(vel)
+S <- cov(vel)
+S.eig <- eigen(S)
+(lambda <- S.eig$values)|>round(4)
+(E <- S.eig$vectors)|>round(4)
+#tabela
+perc <- lambda/sum(lambda)*100
+tabela.val <- cbind(round(lambda,3),round(perc,2),round(cumsum(perc),1))
+rownames(tabela.val) <- paste0("Comp",1:7)
+colnames(tabela.val)  <- c("Autovalor","% Variância","% Acumulada")
+tabela.val
+```
+
+Usando as velocidades, temos que as novas componentes são diferentes. Isso, porém, não se deve à conversão dos dados, mas sim pelo uso da matriz de covariâncias. A interpretação para as duas primeiras componentes permanece a mesma.
+
+Seguem as classificações dos países de acordo com a primeira componente dessa segunda análise, do maior para o menor:
+
+```{r}
+Y <- scale(vel,scale=F)%*%E
+clas <- 1:nrow(x)
+#decreasing=F pois maior velocidade -> melhor desempenho
+names(clas) <- names(sort(Y[,1]))
+clas
+```
+
+Aqui, temos que as classificações são semelhantes às obtidas na outra análise, reforçando que as componentes podem, sim, ser interpretadas de mesma forma. É mais interessante esse segundo resultado, pois usa variáveis com unidade de medida igual.
+
+# Questão 8
+
+:::{.callout-note}
+# Enunciado
+
+(JOHNSON; WICHERN, 2007: exercícios 8.20 e 8.21, pág. 476). O conjunto de
+dados disponível no arquivo T8-6.dat refere-se a recordes mundiais masculinos
+em corridas. (Fonte: IAAF/ATFS Track and Field Handbook for Helsinki 2005)
+
+a) Repita a análise conduzida no exercício anterior (Questão 7).
+
+:::
+
+Primeiramente, encontraremos a matriz de correlações do conjunto de dados e seus respectivos autovalores e autovetores:
+
+```{r}
+x <- as.matrix(read.table("T8-6.DAT",row.names = 9,
+                col.names=c("m100","m200","m400",
+                            "m800","m1500","m5000","m10000","Mrtn","País")))
+xp <- scale(x)
+# a variável x1: país será usada como identificadora apenas
+(R <- cor(x))
+R.eig <- eigen(R)
+#valores
+(lambda <- R.eig$values)|>round(4)
+#vetores
+(E <- R.eig$vectors)|>round(4)
+#componentes
+Y <- xp%*%E
+```
+
+Montaremos, também, uma tabela com a variância total (padronizada) explicada pelas componentes:
+
+```{r}
+perc <- lambda/sum(lambda)*100
+tabela.val <- cbind(round(lambda,3),round(perc,2),round(cumsum(perc),1))
+rownames(tabela.val) <- paste0("Comp",1:8)
+colnames(tabela.val)  <- c("Autovalor","% Variância","% Acumulada")
+tabela.val
+```
+
+Similarmente ao exercício anterior, as componentes parecem ser tais que a primeira indica excelência atlética nas corridas e a segunda é contraste entre explosão e resistência.
+
+Aqui seguem as classificações dos países de acordo com a primeira componente, do maior para o menor:
+
+```{r}
+clas <- 1:nrow(x)
+#decreasing=T pois quanto maior o tempo pior a performance
+names(clas) <- names(sort(Y[,1],decreasing=T))
+clas
+```
+
+Esses *rankings* parecem ser consistentes com a noção de excelência atlética atribuída à componente e são parecidos com os do exercício anterior.
+
+Agora, faremos uma mudança no conjunto de dados para que todas as medidas sejam em segundos:
+
+```{r}
+x[,-(1:3)] <- x[,-(1:3)]*60
+```
+
+E converteremos os tempos em velocidades médias, considerando a distância de 42.195km para a maratona:
+
+```{r}
+dist <- c(100,200,400,800,1500,5000,10000,42195)
+vel <- (1/x)%*%diag(dist)
+```
+
+Usando esse novo conjunto de dados, faremos uma outra ACP:
+
+```{r}
+R <- cor(vel)
+S <- cov(vel)
+S.eig <- eigen(S)
+(lambda <- S.eig$values)|>round(4)
+(E <- S.eig$vectors)|>round(4)
+#tabela
+perc <- lambda/sum(lambda)*100
+tabela.val <- cbind(round(lambda,3),round(perc,2),round(cumsum(perc),1))
+rownames(tabela.val) <- paste0("Comp",1:8)
+colnames(tabela.val)  <- c("Autovalor","% Variância","% Acumulada")
+tabela.val
+```
+
+Usando as velocidades médias, temos que as novas componentes são diferentes, devido ao uso da matriz de covariância onde a escala interfere nelas. A interpretação para as duas primeiras componentes permanece a mesma.
+
+Seguem as classificações dos países de acordo com a primeira componente dessa segunda análise, do maior para o menor:
+
+```{r}
+Y <- scale(vel,scale=F)%*%E
+clas <- 1:nrow(x)
+#decreasing=F pois maior velocidade -> melhor desempenho
+names(clas) <- names(sort(Y[,1]))
+clas
+```
+
+Temos que os rankings são consistentes com a noção de excelência atlética atribuída à componente e se assemelham aos obtidos para os dados de corredoras mulheres, obtidos no exercício anterior.
