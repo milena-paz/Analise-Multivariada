@@ -1,0 +1,63 @@
+---
+title: "Atividade 2 - PCA"
+author: "Milena Paz Freitas"
+subtitle: "Análise Multivariada - 2026.1"
+format: html
+page-layout: full
+lang: pt-BR
+title-block-banner: true
+title-block-style: manuscript
+embed-resources: true
+editor: source
+theme: sandstone
+bibliography: "ref.bib"
+callout-appearance: "minimal"
+toc: true
+toc-expand: true
+csl: abnt.csl
+---
+
+::: {.hidden}
+$$
+\newcommand{\inv}{^{-1}}
+\newcommand{\bm}[1]{\boldsymbol{#1}}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\E}{\text{E}}
+\newcommand{\cov}{\text{Cov}}
+$$
+:::
+
+# Questão 1
+
+```{r}
+x=read.csv2("home.csv")
+#Analise fatorial metodo verossimilhanca
+screeplot(prcomp(x),type="l")
+#dois fatores parecem suficientes mas vamos fazer com três para verificar
+ob <- factanal(x,factors=2,rotation="none")
+```
+
+# Questão 2
+
+```{r}
+P=diag(nrow=3,ncol=3)
+P[lower.tri(P)] <- c(0.63,0.45,0.35) -> P[upper.tri(P)]
+P
+#um fator
+L <- matrix(c(0.9,0.7,0.5),ncol=1)
+Psi<-diag(c(0.19,0.51,0.75))
+#RECONSTRUINDO P
+tcrossprod(L)+Psi
+```
+
+```{r}
+#Comunalidades de F1
+L**2
+```
+
+Temos que maior parte da variância de $Z_1$ é explicada pelo fator, 81%, enquanto $Z_2$ e $Z_3$ são explicados em 49% e 25%, respectivamente. A primeira variável é, então a mais representada.
+
+```{r}
+# Correlações entre fator e 
+```
+
