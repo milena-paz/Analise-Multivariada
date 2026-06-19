@@ -29,13 +29,139 @@ $$
 
 # Questão 1
 
+:::{.callout-note}
+
+# Enunciado
+
+Abra o arquivo home.csv. Ele se refere a uma pesquisa que foi feita para estudar o
+comportamento das pessoas em relação ao hábito de fazer compras. As variáveis são
+assim definidas:
+
+− Q1: Eu prefiro passar uma noite calma e tranquila em casa do que sair para ir a
+uma festa;
+
+− Q2: Eu sempre observo cuidadosamente os preços, mesmo em produtos
+pequenos;
+
+− Q3: A internet é mais interessante que cinemas;
+
+− Q4: Eu não compro produtos que são anunciados na televisão pois não acredito
+em propagandas;
+
+− Q5: Eu gosto mesmo é de ficar em casa;
+
+− Q6: Eu sempre compro produtos que estão vendidos com desconto;
+
+− Q7: As empresas desperdiçam muito dinheiro em propaganda.
+
+Foram entrevistadas 25 pessoas. Cada pessoa teve que expressar sua concordância
+com a frase em questão. A escala medida foi de 1 a 7, onde 1 representa a
+discordância total e 7 representa a concordância total.
+
+a) Faça uma análise fatorial e interprete os fatores. Justifique sua escolha pelo
+método de eliminação de matrizes $L$ e $\Psi$ que tiver utilizado.
+
+b) Faça uma rotação ortogonal dos fatores encontrados em (a) e compare as
+soluções. Qual lhe parece melhor?
+
+c) Dê uma matriz residual relativa à análise fatorial antes da rotação e depois da
+rotação ortogonal. O que você pode observar?
+
+d) Dê as comunalidades e variâncias específicas estimadas antes da rotação e
+depois da rotação ortogonal?
+
+e) O que você poderia dizer sobre o hábito de compras da população da qual esta
+amostra de pessoas foi obtida? [Para responder esta questão você precisa obter
+escores dos fatores usando a solução que achou mais conveniente em (b)].
+
+f) Agora faça uma rotação não ortogonal nos seus fatores encontrados em (a).
+Compare as soluções encontradas com as anteriores.
+
+g) Repita o item e) considerando a análise que você fez em f).
+
+
+:::
+
+Faremos uma análise fatorial por método de componentes principais, já que não sabemos a distribuição dos dados. Assim, procedemos:
+
 ```{r}
-x=read.csv2("home.csv")
-#Analise fatorial metodo verossimilhanca
-screeplot(prcomp(x),type="l")
-#dois fatores parecem suficientes mas vamos fazer com três para verificar
-ob <- factanal(x,factors=2,rotation="none")
+x=read.csv2("home.csv",row.names = 1)
+R=cor(x)
+E <- eigen(R)$vectors
+lambda <- eigen(R)$values
+L <- E%*%diag(sqrt(lambda))
+#numero de componentes
+screeplot(prcomp(x),type='l')
+#faremos com 4 fatores, que é onde está o "cotovelo" do screeplot.
+L4 <- L[,1:4]
+comum <- rowSums(L4**2)
+R4 <- tcrossprod(L)
+
+#verificando residuos
+all(R-R4<0.05)
+#parece ser ok, usaremos essa iteração
+
+round(L4,3)
 ```
+
+Olhando pela matriz de loadings, temos que o primeiro fator representa as perguntas que mais identificam uma pessoa "caseira", enquanto o segundo fator contrasta compradores analíticos vs. aqueles que evitam os que têm propaganda. O terceiro e quarto fatores são de difícil interpretação. Aplicando uma rotação ortogonal na matriz de loadings, obtemos:
+
+```{r}
+rot <- varimax(L4)$loadings
+print(rot,cutoff=0.25)
+```
+
+Feita a rotação, temos que o primeiro fator continua com a mesma interpretabilidade (fator 'caseiro'); o segundo é relacionado ao desgosto por propagandas(fator 'cínico'); o terceiro caracteriza um comprador atencioso aos preços e descontos (fator 'pechincha'); o quarto é de difícil interpretação, contrasta pessoas 'caseiras' vs. acreditar que propagandas são desperdício de dinheiro.
+
+Evidentemente, a rotação auxiliou com a interpretabilidade dos fatores e é preferível. Verificamos a matriz residual relativa ao modelo anterior e posterior à rotação:
+
+```{r}
+R-R4
+R-tcrossprod(rot)
+```
+
+Temos que a matriz $R_4$ reconstruída por $LL'$ é uma aproximação de $R$ muito mais precisa que a reconstruída pela matriz rotacionada.
+
+Calcularemos as comunalidades para as duas matrizes de loadings obtidas:
+
+```{r}
+rowSums(L4^2)
+rowSums(rot^2)
+```
+
+Agora as variâncias específicas:
+
+```{r}
+1-rowSums(L4^2)
+1-rowSums(rot^2)
+```
+
+Tanto as comunalidades quanto as especificidades são as mesmas para antes e depois da rotação. Vamos observar os escores da amostra:
+
+```{r}
+z <- scale(x)
+f=z%*%solve(R)%*%rot
+head(round(f,3))
+```
+
+Temos que os escores indicam, por exemplo, que o primeiro elemento é cínico de propagandas e gosta de pechinchar; o perfil do segundo é de uma pessoa caseira que não é nada atenta aos preços e descontos. 
+
+Agora faremos uma rotação não-ortogonal nos dados, ou seja, haverá correlação entre os fatores se fizermos:
+
+```{r}
+obliq <- GPArotation::oblimin(L4)
+print(obliq$loadings,digits=2)
+```
+
+Assim, pelos loadings da rotação promax podemos observar que o primeiro fator passa a ser um contraste entre pessoas que gostam da internet vs aqueles que não gostam de propagandas; O segundo fator segue a lógica do fator 'pechincha', o terceiro representa compradores atenciosos vs. aqueles que não compram produtos de propaganda e o quarto segue a lógica do fator 'caseiro'.
+
+Faremos uma análise de escores para essa matriz:
+
+```{r}
+head(round(z%*%solve(R)%*%rot%*%obliq$Phi,2))
+```
+
+Para os mesmos indivíduos que antes: o primeiro gosta de pechinchar e é caseiro, enquanto o segundo gosta de internet e é um comprador que não gosta de propagandas. Ou seja, após aplicar uma rotação oblíqua, não só mudaram as interpretações dos fatores, mas também houve uma mudança nos perfis dos compradores.
 
 # Questão 2
 
