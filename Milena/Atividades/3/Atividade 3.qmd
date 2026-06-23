@@ -1,0 +1,624 @@
+---
+title: "Atividade 2 - PCA"
+author: "Milena Paz Freitas"
+subtitle: "Análise Multivariada - 2026.1"
+format: html
+page-layout: full
+lang: pt-BR
+title-block-banner: true
+title-block-style: manuscript
+embed-resources: true
+editor: source
+theme: sandstone
+bibliography: "ref.bib"
+callout-appearance: "minimal"
+toc: true
+toc-expand: true
+csl: abnt.csl
+---
+
+::: {.hidden}
+$$
+\newcommand{\inv}{^{-1}}
+\newcommand{\bm}[1]{\boldsymbol{#1}}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\E}{\text{E}}
+\newcommand{\cov}{\text{Cov}}
+$$
+:::
+
+# Questão 1
+
+Faremos uma análise fatorial por método de componentes principais, já que não sabemos a distribuição dos dados. Assim, procedemos:
+
+```{r}
+x=read.csv2("home.csv",row.names = 1)
+R=cor(x)
+E <- eigen(R)$vectors
+lambda <- eigen(R)$values
+L <- E%*%diag(sqrt(lambda))
+#numero de componentes
+screeplot(prcomp(x),type='l')
+#faremos com 4 fatores, que é onde está o "cotovelo" do screeplot.
+L4 <- L[,1:4]
+comum <- rowSums(L4**2)
+R4 <- tcrossprod(L)
+
+#verificando residuos
+all(R-R4<0.05)
+#parece ser ok, usaremos essa iteração
+
+round(L4,3)
+```
+
+Olhando pela matriz de loadings, temos que o primeiro fator representa as perguntas que mais identificam uma pessoa "caseira", enquanto o segundo fator contrasta compradores analíticos vs. aqueles que evitam os que têm propaganda. O terceiro e quarto fatores são de difícil interpretação. Aplicando uma rotação ortogonal na matriz de loadings, obtemos:
+
+```{r}
+rot <- varimax(L4)$loadings
+print(rot,cutoff=0.25)
+```
+
+Feita a rotação, temos que o primeiro fator continua com a mesma interpretabilidade (fator 'caseiro'); o segundo é relacionado ao desgosto por propagandas(fator 'cínico'); o terceiro caracteriza um comprador atencioso aos preços e descontos (fator 'pechincha'); o quarto é de difícil interpretação, contrasta pessoas 'caseiras' vs. acreditar que propagandas são desperdício de dinheiro.
+
+Evidentemente, a rotação auxiliou com a interpretabilidade dos fatores e é preferível. Verificamos a matriz residual relativa ao modelo anterior e posterior à rotação:
+
+```{r}
+R-R4
+R-tcrossprod(rot)
+```
+
+Temos que a matriz $R_4$ reconstruída por $LL'$ é uma aproximação de $R$ muito mais precisa que a reconstruída pela matriz rotacionada.
+
+Calcularemos as comunalidades para as duas matrizes de loadings obtidas:
+
+```{r}
+rowSums(L4^2)
+rowSums(rot^2)
+```
+
+Agora as variâncias específicas:
+
+```{r}
+1-rowSums(L4^2)
+1-rowSums(rot^2)
+```
+
+Tanto as comunalidades quanto as especificidades são as mesmas para antes e depois da rotação. Vamos observar os escores da amostra:
+
+```{r}
+z <- scale(x)
+f=z%*%solve(R)%*%rot
+head(round(f,3))
+```
+
+Temos que os escores indicam, por exemplo, que o primeiro elemento é cínico de propagandas e gosta de pechinchar; o perfil do segundo é de uma pessoa caseira que não é nada atenta aos preços e descontos. 
+
+Agora faremos uma rotação não-ortogonal nos dados, ou seja, haverá correlação entre os fatores se fizermos:
+
+```{r}
+obliq <- GPArotation::oblimin(L4)
+print(obliq$loadings,digits=2)
+```
+
+Assim, pelos loadings da rotação promax podemos observar que o primeiro fator passa a ser um contraste entre pessoas que gostam da internet vs aqueles que não gostam de propagandas; O segundo fator segue a lógica do fator 'pechincha', o terceiro representa compradores atenciosos vs. aqueles que não compram produtos de propaganda e o quarto segue a lógica do fator 'caseiro'.
+
+Faremos uma análise de escores para essa matriz:
+
+```{r}
+head(round(z%*%solve(R)%*%rot%*%obliq$Phi,2))
+```
+
+Para os mesmos indivíduos que antes: o primeiro gosta de pechinchar e é caseiro, enquanto o segundo gosta de internet e é um comprador que não gosta de propagandas. Ou seja, após aplicar uma rotação oblíqua, não só mudaram as interpretações dos fatores, mas também houve uma mudança nos perfis dos compradores.
+
+# Questão 2
+
+Vamos reconstruir a matriz P por meio do modelo fatorial sugerido pelo enunciado:
+
+```{r}
+P=diag(nrow=3,ncol=3)
+P[lower.tri(P)] <- c(0.63,0.45,0.35) -> P[upper.tri(P)]
+P
+#um fator
+L <- matrix(c(0.9,0.7,0.5),ncol=1)
+Psi<-diag(c(0.19,0.51,0.75))
+#RECONSTRUINDO P
+tcrossprod(L)+Psi
+```
+
+Calcularemos as comunalidades do primeiro fator:
+
+```{r}
+#Comunalidades de F1
+L**2
+```
+
+Temos que maior parte da variância de $Z_1$ é explicada pelo fator, 81%, enquanto $Z_2$ e $Z_3$ são explicados em 49% e 25%, respectivamente. A primeira variável é, então a mais representada. Como o modelo é ortogonal, as correlações $Cor(F_1,\bm X)$ são a matriz de loadings:
+
+```{r}
+# Correlações entre fator e variáveis originais
+L
+```
+
+Evidentemente, o primeiro fator tem maior peso na variável $X_1$, pois possui a maior correlação com ela. Encontraremos os autovalores e autovetores de P para realizar uma análise fatorial via componentes principais:
+
+```{r}
+lambda <- eigen(P)$values
+E <- eigen(P)$vectors
+
+L1 <- (E%*%diag(sqrt(lambda)))[,1]
+L1
+
+Psi <- diag(1-L1**2)
+Psi
+#reconstruindo P:
+(tcrossprod(L1)+Psi)
+# a reconstrução não é muito boa, vamos fazer iterativamente:
+comum=L1**2
+delta=100
+while(delta>1E-5){
+  R <- P
+  diag(R) <- L1**2
+  #usando svd no lugar de eigen por estabilidade numerica
+  #(ausencia de autovalores proximos de 0 negativos)
+  lambda <- svd(R)$d
+  E <- svd(R)$u
+  L <- E%*%diag(sqrt(lambda))
+  L1 <- L[,1]
+  Psi <- diag(1-L1**2)
+  delta= sum((comum-L1**2)^2)
+  R.st=tcrossprod(L1)+Psi
+  comum=L1**2
+}
+#loadings
+L1
+#variancia especifica
+Psi
+#reconstrucao final
+R.st
+#comunalidades
+comum
+```
+
+Temos que, ao fim dessa aproximação temos resultados muito próximos aos usados no começo do exercício. A proporção da variância explicada pelo fator 1 é:
+
+```{r}
+lambda[1]/sum(lambda)
+```
+
+Ou seja, quase toda a variância total (99.3%) é explicada pelo primeiro fator.
+
+# Questão 3
+
+A partir da equação $\Sigma=LL'+\Psi$ e para p=2 e m=1 temos:
+
+$$
+\mat{\sigma_{11}&\sigma_{12}\\\sigma_{21}&\sigma_{22}}=\mat{l^2_{11}+\psi_1&l_{21}l_{11}\\l_{21}l_{11}&l^2_{21}+\psi_2}
+$$
+
+Logo: $\sigma_{11}=l^2_{11}+\psi_1$, $\sigma_{12}=\sigma_{21}=l_{21}l_{11}$ e $\sigma_{22}=l^2_{21}+\psi_2$.
+
+A partir dessa equação matricial, temos um sistema:
+
+$$
+\begin{cases}
+l^2_{11}+\psi_1-\sigma_{11}=0\\
+l^2_{21}+\psi_2-\sigma_{22}=0\\
+l_{21}l_{11} -\sigma_{12} =0
+\end{cases}
+$$
+
+As incógnitas, no caso, seriam os l's e os psi's. Porém, temos quatro valores desconhecidos para 3 equações. Dessa forma, o sistema é considerado subdeterminado, o que implica uma infinidade de soluções.
+
+# Questão 4
+
+Para essa matriz temos que as equações como definidas pela equação $\Sigma=LL'+\Psi$ são:
+
+$$
+\begin{cases}
+l^2_{11}+\psi_1=1\\
+l^2_{21}+\psi_2=1\\
+l^2_{31}+\psi_3=1\\
+l_{21}l_{11} = 0.4\\
+l_{31}l_{11} = 0.9\\
+l_{31}l_{21} = 0.7
+\end{cases}
+$$
+
+Logo, temos que: $l_{21}/l_{31}=4/9$ e $l_{31}l_{21}=0.7$ então: $l_{21}^2=0.7×4/9=0.3111...\Rightarrow l_{21}=\pm0.558$. Equivalentemente:
+$l_{11}=\pm0.717$ e $l_{31}=\pm1.255$. Já temos algo estranho por este valor de $l_{31}$ ser maior que 1. A partir de $LL'$, temos que seu elemento da linha 3 e coluna 3 é $l_{31}^2=1.575$; voltando ao sistema: $\psi_3=1-1.575=-0.575<0$. Como os psi's são variâncias (específicas), a solução não é própria pois variâncias não assumem valores negativos.
+
+# Questão 5
+
+Primeiramente, padronizaremos as variáveis para realizar uma análise fatorial ortogonal:
+
+```{r}
+x=read.table("T9-12.dat",
+             col.names = c("Crescimento","Lucratividade","Novas",
+                           "tCriatividade","tMecanico","tAbstrato","tMatematico"))
+z <- scale(x)
+z[,1:3] <- apply(x[,1:3],2, function(x) (x-100)/sd(x))
+```
+
+Faremos uma estimação por meio de componentes principais, como segue:
+
+```{r}
+P <- cov(z)
+lambda <- svd(P)$d
+E <- svd(P)$u
+
+round(L2 <- (E%*%diag(sqrt(lambda)))[,1:2],3)
+round(L3 <- (E%*%diag(sqrt(lambda)))[,1:3],3)
+round(Psi2 <- diag(1-rowSums(L2**2)),3)
+round(Psi3 <- diag(1-rowSums(L3**2)),3)
+```
+
+Com esses resultados (ambos válidos), temos as seguintes rotações:
+
+```{r}
+L2r <- varimax(L2)$loadings; L3r <- varimax(L3)$loadings
+print(L2r,cutoff=0.25);print(L3r,cutoff=0.25)
+```
+
+-  **m=2 Fatores**: Os fatores são de difícil interpretação, muito generalizados.
+
+- **m=3 Fatores**: O primeiro fator é muito geral, o segundo associa criatividade à venda de novas contas e raciocínio mecânico, abstrato e o terceiro une raciocínio abstrato à quantidade de vendas (independente de lucro).
+
+Abaixo estão as comunalidades, variâncias específicas e $LL'+\Psi$ para cada modelo.
+
+```{r}
+round(cbind(comunalidade=rowSums(L2r**2),
+            especificidade=1-rowSums(L2r**2)),3)
+round(R2 <- tcrossprod(L2)+Psi2,2)
+round(cbind(comunalidade=rowSums(L3r**2),
+            especificidade=1-rowSums(L3r**2)),3)
+round(R3 <- tcrossprod(L3r)+Psi3,2)
+#matriz de correlacoes, de referencia
+round(P,2)
+```
+
+Por produzir melhor aproximação de $P$ e melhor interpretatividade, o modelo com m=3 aparenta ser mais adequado. Faremos um teste ao nivel de 1% para verificar se os modelos acima são adequados:
+
+```{r}
+n=nrow(x)
+teste <- function(R,m){
+  p=ncol(R)
+  t <- (n-1-(2*p+4*m+5)/6)*log(det(R)/det(P))
+  gl=((p-m)^2-p-m)/2
+  cat("m =",m,"Fatores\n","p-valor:",1-pchisq(t,gl),"\n")
+}
+teste(R2,2)
+teste(R3,3)
+```
+
+Como ambos testes, podemos observar que nenhum dos dois é adequado. Porém, seguindo o julgamento anterior, o modelo m=3 é preferível.
+
+Supondo que haja um novo vendedor com a seguinte observação:
+
+```{r}
+xi <- c(110,98,105,15,18,12,35)
+#padronizado
+zi <- (xi-c(rep(100,3),attributes(z)$`scaled:center`[4:7]))/attributes(z)$`scaled:scale`
+```
+
+Calcularemos o score desse vendedor como segue:
+
+```{r}
+freg <-t(L3r)%*%solve(R3)%*%zi
+fmqp <- solve(t(L3r)%*%solve(Psi3)%*%L3)%*%(t(L3r)%*%solve(Psi3)%*%zi)
+cat("Escores por método de Regressão:\n",freg,"\n")
+cat("Escores por método de Mínimos Quadrados Ponderados:\n",fmqp)
+```
+
+# Questão 6
+
+Usando esta matriz de correlações e desvios-padrão:
+
+```{r}
+R=diag(nrow=4)
+R[lower.tri(R)] <- c(.7501,.6329,.6363,.6925,.7386,.6625) -> R[upper.tri(R)]
+R
+dp <- c(32.9909,33.5918,36.5534,37.3517)
+```
+
+Obtemos a matriz de covariâncias que iremos usar a diante:
+
+```{r}
+S <- diag(dp)%*%R%*%diag(dp)
+```
+
+
+Temos a seguinte solução por componentes principais para modelo fatorial m=1 e m=2:
+
+```{r}
+lambda <- eigen(S)$values
+E <- eigen(S)$vectors
+L <- E%*%diag(sqrt(lambda))
+#loadings
+L1 <- L[,1]
+(L2 <- L[,1:2])
+#nao precisa imprimir L1 é so olhar a primeira coluna
+#unicidades
+round(Psi1 <- diag(1-L1**2),3)
+round(Psi2 <- diag(1-rowSums(L2**2)),3)
+```
+
+Para método de máxima verossimilhança, temos a seguinte solução:
+
+```{r}
+ob1 <- factanal(covmat=S,factors=1,n.obs=150,rotation="none")
+(Lmv <- ob1$loadings)
+(Psimv <- ob1$uniquenesses)
+#ob2 <- factanal(covmat=R,factors=2,n.obs=150,rotation="none")
+```
+
+Não é possível obter a estimativa para 2 fatores por não ser adequado para p=4 neste método ($((p-m)^2-p-m)/2=-1<0$ no teste qui-quadrado). Faremos uma rotação Varimax nas soluções:
+
+```{r}
+(L2r <- varimax(L2)$loadings)
+```
+
+Para os modelos de 1 fator, a rotação é dispensável (o resultado é a mesma matriz de loadings).
+
+Faremos a mesma operação para a matriz R:
+
+```{r}
+lambda <- eigen(R)$values
+E <- eigen(R)$vectors
+L <- E%*%diag(sqrt(lambda))
+#loadings
+L1 <- L[,1]
+(L2 <- L[,1:2])
+#nao precisa imprimir L1 é so olhar a primeira coluna
+#unicidades
+round(Psi1 <- diag(1-L1**2),3)
+round(Psi2 <- diag(1-rowSums(L2**2)),3)
+```
+
+
+Para método de máxima verossimilhança, temos a seguinte solução:
+
+```{r}
+ob1 <- factanal(covmat=R,factors=1,n.obs=150,rotation="none")
+(Lmv <- ob1$loadings)
+(Psimv <- ob1$uniquenesses)
+#ob2 <- factanal(covmat=R,factors=2,n.obs=150,rotation="none")
+```
+
+Não é possível obter a estimativa para 2 fatores por não ser adequado para p=4 neste método ($((p-m)^2-p-m)/2=-1<0$ no teste qui-quadrado). Faremos uma rotação Varimax nas soluções:
+
+```{r}
+(L2r <- varimax(L2)$loadings)
+```
+
+Para os modelos de 1 fator, a rotação é dispensável (o resultado é a mesma matriz de loadings).
+
+Interpretativamente, Os modelos pré-rotação não são interpretáveis: os fatores são muito gerais ou muito esparsos. O modelo rotacionado parece dar mais ênfase às duas primeiras ninhadas no fator 1 e às duas últimas no segundo fator.
+
+Calcularemos os escores do modelo de máxima verossimilhança (por método de regressão) para uma observação dada abaixo:
+
+```{r}
+#observação
+zi <- c(0.8,-0.2,-.8,1.5)
+#escores
+t(L2r)%*%solve(tcrossprod(L2r)+Psi2)%*%zi
+```
+
+# Questão 7
+
+Faremos uma análise fatorial usando a matriz de covariâncias amostral: 
+
+```{r}
+x <- as.matrix(read.table("T1-9.DAT",row.names = 1,
+                col.names=c("País","m100","m200","m400",
+                            "m800","m1500","m3000","Mrtn")))
+S <- cov(x)
+lambda <- eigen(S)$values
+E <- eigen(S)$vectors
+L <- E%*%diag(sqrt(lambda))
+(L2 <- L[,1:2])
+Psi <- diag(diag(S)-rowSums(L2**2))
+```
+
+Por conta da maratona ser muito mais extensa que as outras corridas, ela apresenta clara dominância sobre as variâncias. Além disso, ela também é extremamente predominante no primeiro fator, o que pode levar à interpretação como fator de resistência. O outro não é interpretável. Escores por regressão:
+
+```{r}
+s <- tcrossprod(L2)+Psi
+f <- t(t(L2)%*%solve(s)%*%t(scale(x,scale=F)))
+plot(f)
+lines(ellipse::ellipse(cov(f),centre=colMeans(f)),col="red")
+text(f[c(11,31,40),],labels=rownames(f)[c(11,31,40)],pos=c(3,2,1),cex=0.8)
+```
+
+Temos alguns outliers, como podem ser vistos acima. Faremos a mesma análise, agora com a matriz de correlações:
+
+```{r}
+R <- cor(x)
+lambda <- eigen(R)$values
+E <- eigen(R)$vectors
+L <- E%*%diag(sqrt(lambda))
+(L2 <- L[,1:2])
+Psi <- diag(diag(S)-rowSums(L2**2))
+```
+
+A maratona não apresenta mais dominância sobre as outras corridas, o primeiro fator sendo um mais geral e o segundo sendo um leve contraste entre corridas mais extensas vs mais curtas.
+
+```{r}
+r <- tcrossprod(L2)+Psi
+z <- scale(x)
+f <- t(t(L2)%*%solve(r)%*%t(z))
+plot(f)
+lines(ellipse::ellipse(cov(f),centre=colMeans(f)),col="red")
+text(f[c(11,31,46),],labels=rownames(f)[c(11,31,46)],pos=c(4,3,1),cex=0.8)
+```
+
+Ainda há outliers, os mesmos mas com Samoa e não Papua-Nova Guiné. Ou seja, a diferença está na interpretabilidade dos fatores.
+
+Agora converteremos os dados para velocidades para realizar novas análises:
+
+```{r}
+vel <- x
+vel[,4:7] <- x[,4:7]*60
+dist <- c(100,200,400,800,1500,3000,42195)
+vel <- (1/vel)%*%diag(dist)
+```
+
+Assim, faremos primeiro para a matriz de covariâncias:
+
+```{r}
+S <- cov(vel)
+lambda <- eigen(S)$values
+E <- eigen(S)$vectors
+L <- E%*%diag(sqrt(lambda))
+(L2 <- L[,1:2])
+Psi <- diag(diag(S)-rowSums(L2**2))
+```
+
+Após a conversão para velocidades, a maratona não está com a mesma predominância de antes. Inclusive, os fatores podem ser interpretados da mesma forma que na análise com a matriz de correlações dos dados originais. Verificamos por outliers:
+
+```{r}
+s <- tcrossprod(L2)+Psi
+f <- t(t(L2)%*%solve(s)%*%t(scale(vel,scale=F)))
+plot(f)
+lines(ellipse::ellipse(cov(f),centre=colMeans(f)),col="red")
+text(f[c(11,31,46),],labels=rownames(f)[c(11,31,46)],pos=c(3,1,3),cex=0.8)
+```
+
+Os outliers são os mesmos que da análise com matriz de correlações dos dados originais. Faremos agora uma análise fatorial para a matriz de correlações dos dados de velocidades:
+
+```{r}
+R <- cor(vel)
+lambda <- eigen(R)$values
+E <- eigen(R)$vectors
+L <- E%*%diag(sqrt(lambda))
+(L2 <- L[,1:2])
+Psi <- diag(diag(S)-rowSums(L2**2))
+```
+
+Os fatores possuem a mesma interpretação que antes. Verificamos outliers:
+
+```{r}
+r <- tcrossprod(L2)+Psi
+z <- scale(vel)
+f <- t(t(L2)%*%solve(r)%*%t(z))
+plot(f)
+lines(ellipse::ellipse(cov(f),centre=colMeans(f)),col="red")
+text(f[c(11,31,40,46),],labels=rownames(f)[c(11,31,40,46)],pos=c(1,4,4,1),cex=0.8)
+```
+
+Aqui, os outliers são união de todos os conjuntos de outliers anteriores.
+
+Entre todas as análises, a que mais prefiro é a para velocidades padronizadas (matriz R), por incluir todos os outliers da outras análises e reter as mesmas interpretações de fatores.
+
+# Questão 8
+
+Faremos uma análise fatorial usando a matriz de covariâncias amostral: 
+
+```{r}
+x <- as.matrix(read.table("T8-6.DAT",row.names = 9,
+                col.names=c("m100","m200","m400",
+                            "m800","m1500","m5000","m10000","Mrtn","País")))
+S <- cov(x)
+lambda <- eigen(S)$values
+E <- eigen(S)$vectors
+L <- E%*%diag(sqrt(lambda))
+(L2 <- L[,1:2])
+Psi <- diag(diag(S)-rowSums(L2**2))
+```
+
+Por conta da maratona ser muito mais extensa que as outras corridas, ela apresenta clara dominância sobre as variâncias. Além disso, ela também é extremamente predominante no primeiro fator, o que pode levar à interpretação como fator de resistência. O outro não é interpretável. Escores por regressão:
+
+```{r}
+s <- tcrossprod(L2)+Psi
+f <- t(t(L2)%*%solve(s)%*%t(scale(x,scale=F)))
+plot(f)
+lines(ellipse::ellipse(cov(f),centre=colMeans(f)),col="red")
+text(f[c(35,16,46,55,12),],
+     labels=rownames(f)[c(35,16,46,55,12)],
+     pos=c(4,2,1,1,3),cex=0.8)
+```
+
+Temos alguns outliers, como podem ser vistos acima. Faremos a mesma análise, agora com a matriz de correlações:
+
+```{r}
+R <- cor(x)
+lambda <- eigen(R)$values
+E <- eigen(R)$vectors
+L <- E%*%diag(sqrt(lambda))
+(L2 <- L[,1:2])
+Psi <- diag(diag(S)-rowSums(L2**2))
+```
+
+A maratona não apresenta mais dominância sobre as outras corridas, o primeiro fator sendo um mais geral e o segundo sendo um contraste entre corridas mais extensas vs mais curtas.
+
+```{r}
+r <- tcrossprod(L2)+Psi
+z <- scale(x)
+f <- t(t(L2)%*%solve(r)%*%t(z))
+plot(f)
+lines(ellipse::ellipse(cov(f),centre=colMeans(f)),col="red")
+text(f[c(16,55,12),],
+     labels=rownames(f)[c(16,55,12)],
+     pos=c(2,1,3),cex=0.8)
+```
+
+Ainda há outliers, os mesmos mas sem Singapura e Malásia. Ou seja, a diferença está na interpretabilidade dos fatores.
+
+Agora converteremos os dados para velocidades para realizar novas análises:
+
+```{r}
+vel <- x
+vel[,-(1:3)] <- x[,-(1:3)]*60
+dist <- c(100,200,400,800,1500,5000,10000,42195)
+vel <- (1/vel)%*%diag(dist)
+```
+
+Assim, faremos primeiro para a matriz de covariâncias:
+
+```{r}
+S <- cov(vel)
+lambda <- eigen(S)$values
+E <- eigen(S)$vectors
+L <- E%*%diag(sqrt(lambda))
+(L2 <- L[,1:2])
+Psi <- diag(diag(S)-rowSums(L2**2))
+```
+
+Após a conversão para velocidades, a maratona não está com a mesma predominância de antes. Inclusive, os fatores podem ser interpretados da mesma forma que na análise com a matriz de correlações dos dados originais. Verificamos por outliers:
+
+```{r}
+s <- tcrossprod(L2)+Psi
+f <- t(t(L2)%*%solve(s)%*%t(scale(vel,scale=F)))
+plot(f)
+lines(ellipse::ellipse(cov(f),centre=colMeans(f)),col="red")
+text(f[c(16,55,12),],
+     labels=rownames(f)[c(16,55,12)],
+     pos=c(2,1,1),cex=0.8)
+```
+
+Os outliers são os mesmos que da análise com matriz de correlações dos dados originais. Faremos agora uma análise fatorial para a matriz de correlações dos dados de velocidades:
+
+```{r}
+R <- cor(vel)
+lambda <- eigen(R)$values
+E <- eigen(R)$vectors
+L <- E%*%diag(sqrt(lambda))
+(L2 <- L[,1:2])
+Psi <- diag(diag(S)-rowSums(L2**2))
+```
+
+Os fatores possuem a mesma interpretação que antes. Verificamos outliers:
+
+```{r}
+r <- tcrossprod(L2)+Psi
+z <- scale(vel)
+f <- t(t(L2)%*%solve(r)%*%t(z))
+plot(f)
+lines(ellipse::ellipse(cov(f),centre=colMeans(f)),col="red")
+text(f[c(16,55,12),],
+     labels=rownames(f)[c(16,55,12)],
+     pos=c(2,1,1),cex=0.8)
+```
+
+Aqui, os outliers são os mesmos que a análise anterior.
+
+Assim, temos que tanto para dados de recordes masculinos quanto femininos, temos um fatores semelhantes em interpretação.
