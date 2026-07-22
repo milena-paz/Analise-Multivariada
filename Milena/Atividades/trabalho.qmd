@@ -1,0 +1,335 @@
+---
+title: "Trabalho Final - Técnicas Multivariadas Aplicadas a Dados de COVID-19"
+author: "Milena Paz Freitas"
+subtitle: "Análise Multivariada - 2026.1"
+format: html
+page-layout: full
+lang: pt-BR
+title-block-banner: true
+title-block-style: manuscript
+embed-resources: true
+editor: source
+theme: sandstone
+bibliography: "ref.bib"
+nocite: |
+  @johnson2002
+callout-appearance: "minimal"
+toc: true
+toc-expand: true
+csl: abnt.csl
+code-fold: true
+knitr:
+  opts_chunk:
+    fig.align: "center"
+---
+
+# Introdução
+
+O conjunto de dados foi compilado pelos autores de @rinaldolucia, e inclui dados públicos da época da pandemia por COVID-19 (cerca de 2020) nos estados de São Paulo e Minas Gerais. Neste trabalho, munida de diversas técnicas de análise de dados multivariados apresentados durante o curso, será feita uma exploração desse mesmo banco usando o software R. Segue um dicionário das variáveis presentes:
+
+- **Município:**	Nome do município
+
+- **Estado:** Estado do município		
+
+- **Casos:**	Número de casos de COVID-19 em 01/10/2020	
+
+- **Óbitos:**	Número de óbitos por COVID-19 EM 01/10/2020	
+
+- **População:**	População estimada em 2020	
+
+- **IDHM:**	Índice de Desenvolvimento Humanao Municipal em 2010	
+
+- **IDHR:**	IDHM Renda em 2010	
+
+- **IDHL:**	IDHM Longevidade em 2010	
+
+- **IDHE:**	IDHM Educação em 2010	
+
+- **Prevalência:**	Número de casos dividido pela população × 100.000	
+
+- **Mortalidade:**	Número de óbitos dividido pela população × 100.000	
+
+- **Letalidade:**	Número de óbitos dividido pelo número de casos × 100%	
+
+
+# 1. Análise exploratória inicial
+
+Serão feitas medidas-resumo e análise gráfica das variáveis a nível individual, além de verificar presença de `NA`s. Primeiramente, a leitura e limpeza dos dados:
+
+```{r}
+#| code-fold: false
+covid=readxl::read_excel("Covid19MGSP.xlsx")
+covid$IDHR <- as.numeric(covid$IDHR)
+```
+
+A linha 216 da coluna IDHR no arquivo estava como "0,673td>", fazendo com que a variável fosse lida como caractere e assim foi convertido para `NA` em `as.numeric()`. Corrigindo:
+
+```{r}
+#| code-fold: false
+covid$IDHR[216] <- 0.673
+covid$Estado <- as.factor(covid$Estado)
+#verificando NAs
+sum(is.na(covid))
+#Não temos NAs, ótimo!
+covid <- as.data.frame(covid)
+```
+
+O conjunto de dados não possui valores faltantes, o que é preferível. Explorando os dados:
+
+```{r}
+summary(covid[-1])
+#Análise Gráfica
+cores=c("darkorange","blue3")
+par(mar=c(4.1,3.1,2,1),mfrow=c(3,1))
+boxplot(Casos~Estado,data=covid,col=cores,horizontal=T)
+boxplot(Óbitos~Estado,data=covid,col=cores,horizontal=T)
+boxplot(População~Estado,data=covid,col=cores,horizontal=T)
+```
+
+Quanto ao número de óbitos, casos de COVID e população municipal, os estados não se diferenciam muito entre si; só vemos mais outliers no estado de SP (a metrópole São Paulo sendo destacada à direita). Veremos, agora, quanto às características de desenvolvimento de cada município:
+
+```{r}
+par(mar=c(3.1,4.1,2,1),mfrow=c(2,2))
+boxplot(IDHM~Estado,data=covid,col=cores)
+boxplot(IDHR~Estado,data=covid,col=cores)
+boxplot(IDHL~Estado,data=covid,col=cores)
+boxplot(IDHE~Estado,data=covid,col=cores)
+```
+
+Minas Gerais parece ter maior variação em termos de desenvolvimento humano que São Paulo. Isso é esperado, já que o estado de SP é conhecido pelo alto desenvolvimento e produto interno bruto em relação aos demais. Quanto à epidemiologia da cidade, temos:
+
+```{r}
+par(mar=c(4.1,3.1,2,1),mfrow=c(3,1))
+boxplot(Prevalência~Estado,data=covid,col=cores,horizontal=T)
+boxplot(Mortalidade~Estado,data=covid,col=cores,horizontal=T)
+boxplot(Letalidade~Estado,data=covid,col=cores,horizontal=T)
+```
+
+Os estados estão próximos em Letalidade mas, em Prevalência e Mortalidade, o estado de São Paulo parece ser mais afetado. A seguir faremos uma matriz de gráficos de dispersão, identificando os estados pela cor dos pontos:
+
+```{r,fig.height=8,fig.width=10,dpi=130}
+cores=c("#FC8D2330","#1700CB30")
+par(mar=c(3.1,3.1,1,1))
+plot(covid[-c(1,2)],col=cores[as.numeric(covid$Estado)])
+```
+
+As variáveis de desenvolvimento parece ter certa elipsidade entre si e melhor distinção entre os grupos, abrindo possibilidade de classificação.
+
+# 2. Análise de Componentes Principais
+
+Faremos uma análise de componentes principais usando todas as variáveis numéricas. Pela diferença de grandeza ser tão grande entre as variáveis (por exemplo, verificar as médias de População e qualquer subtipo de IDH) usaremos a matriz de correlações para esse fim.
+
+```{r}
+x=as.matrix(covid[-c(1,2)])
+colnames(x) <- c("Casos","Obitos","Pop","IDHM","IDHR","IDHL","IDHE","Prev","Mort","Let")
+#matriz de correlacoes
+round(R <- cor(x),2)
+#dados padronizados
+z=scale(x)
+# vamos usar SVD por possuir maior estabilidade numerica que eigen()
+Rsvd <- svd(R)
+lambda=Rsvd$d
+E=Rsvd$u
+```
+
+Assim, esses são os autovalores obtidos:
+
+```{r}
+round(lambda,2)
+```
+
+E autovetores:
+
+```{r}
+round(E,2)
+```
+
+Daqui, podemos ver que a primeira componente é muito geral e não possui interpretabilidade. A segunda parece dar leve contraste entre características demográficas e de desenvolvimento humano. No geral, não é muito interessante analisá-las.
+
+# 3. Verificação de Normalidade
+
+Para realizar as próximas técnicas é interessante saber se os dados são normalmente distribuídos; por exemplo, técnicas de classificação e discriminação que utilizam verossimilhança (no R, pelo pacote `MASS`, são QDA e LDA). Assim, podemos verificar das seguintes formas:
+
+## Normalidade Univariada
+
+Faremos Q-Q plots para todas as variáveis e testes Shapiro-Wilk, Anderson-Darling e Lilliefors ao nível de 5%. Os p-valores arrendondados para 4 casas estarão escritos sobre o gráfico quantil-quantil. Primeiramente, para o estado de São Paulo:
+
+```{r}
+library(nortest)
+par(mfrow=c(2,2),mar=c(4.1,4.1,2,1))
+normal1d <- function(i,estado){
+  x=covid[covid$Estado==estado,i]
+  qqnorm(scale(x), main=names(covid)[i+2])
+  abline(a=0,b=1,col="red",lwd=2)
+  pvalores <- c(ad.test(x)$p.value,  shapiro.test(x)$p.value,  lillie.test(x)$p.value) |> round(4)
+  mtext(paste0("AD: ",pvalores[1],"\n",
+               "Shap: ",pvalores[2],"\n",
+               "Lill: ",pvalores[3],"\n"),line=-5,at=-1.7,cex=0.85)
+}
+invisible(sapply(3:12,normal1d,estado="SP"))
+```
+
+Assim, temos que apenas o IDHL e a mortalidade parecem ser normais univariadas no estado de SP. No estado de MG:
+
+```{r}
+par(mfrow=c(2,2),mar=c(4.1,4.1,2,1))
+invisible(sapply(3:12,normal1d,estado="MG"))
+```
+
+O mesmo ocorreu no estado de MG.
+
+
+## Normalidade Bivariada
+
+Será feito graficamente verificação da elipsidade dos pares de variáveis, com as elipses de 95% em vermelho e as de 50% em azul desenhadas.
+
+```{r,message=F}
+par(mfrow=c(3,5),mar=c(4.1,4.1,2,1))
+pares <- combn(10,2)
+Xc <- scale(x,scale=F)
+grafico <- function(i,j){ #GRAFICO DE DISPERSAO
+  plot(medidas[[paste0("X",i)]],medidas[[paste0("X",j)]],
+       xlab=paste0("X",i),ylab=paste0("X",j))
+}
+Sij <- function(i,j){#COVARIANCIAS
+  cov(Xc[,c(i,j)])
+}
+dj2 <- function(ij){
+  diag(Xc[,ij]%*%solve(Sij(ij[1],ij[2]))%*%t(Xc[,ij]))
+}
+#qui-quadrado p/ identificar outliers
+out <-apply(pares,2,function(ij){
+  which(dj2(ij) > qchisq(0.95,df=2))
+  })
+library(ellipse)
+#GRAFICO CENTRADO
+graficoC <- function(i,j){
+  plot(Xc[,i],Xc[,j],
+       xlab=names(covid)[i+2],ylab=names(covid)[j+2])
+}
+## ELIPSES 95%
+invisible(apply(pares,2,function(ij){
+  graficoC(ij[1],ij[2])
+  disp <- Xc[,ij]
+  points(disp[out[[paste0(ij,collapse = "")]],],pch=19,col="maroon")
+  elip <- ellipse(cor(disp)[1,2],level=0.95,scale=apply(disp,2,sd),
+                  centre=colMeans(disp))
+  lines(elip,col="red2",lty=2,lwd=2)
+  elip50 <- ellipse(cor(disp)[1,2],level=0.5,scale=apply(disp,2,sd),
+                  centre=colMeans(disp))
+  lines(elip50,col="blue",lty=2,lwd=2)
+  }))
+```
+
+Visualmente os pares envolvendo os IDHs parecem ter mais definida elipsicidade.
+
+# 4. Análise Fatorial
+
+Usando análise fatorial por verossimilhança (já que a análise de componentes principais não gerou bons resultados), temos os seguintes resultados sem rotação:
+
+```{r}
+fa <- factanal(z,factors=6,rotation="none")
+fa
+```
+
+Usando 5 fatores ou menos temos rejeição da hipótese de suficiência de número de fatores. Daqui, temos que as loadings são de difícil interpretação: os dois primeiros fatores são muito gerais; o segundo parece indicar demografia, quantidade de pessoas; o terceiro relaciona a prevalência com mortalidade (relação óbvia, o número de mortes por COVID está diretamente relacionado com o número de casos); o quarto contradiz o anterior; os demais fatores não tem interpretação.
+
+Assim, vê-se necessário usar uma rotação. Por Varimax:
+
+```{r}
+print(L <- loadings(varimax(loadings(fa))),cutoff=0.32)
+```
+
+Daqui temos que o primeiro fator parece ser um indicador de desenvolvimento; o segundo e terceiro fatores mantêm a mesma interpretação; o quarto fator relaciona a letalidade à mortalidade, sendo um fator de risco de morte; o quinto e sexto não parecem relevantes.
+
+O escore (método de regressão) das cidades Juiz de Fora e São Paulo, por exemplo, são:
+
+```{r}
+z0 <- z[c(419,1418),]
+Psi=diag(fa$uniquenesses)
+R6 <- tcrossprod(L)+Psi
+escoreBH<- (t(L)%*%solve(R6)%*%z0[1,])
+escoreSP<- (t(L)%*%solve(R6)%*%z0[2,])
+colnames(escoreBH) <- "Juiz de Fora"
+colnames(escoreSP) <- "São Paulo"
+escoreBH
+escoreSP
+```
+
+Os escores dos dois primeiros fatores refletem bem a diferença de densidade populacional das cidades e qualidade de vida.
+
+# 5. Modelo de Classificação
+
+A matriz de dispersão feita durante a análise exploratória evidencia certa difernciação entre as características das cidades do estado de MG e de SP. Suponha que tenhamos o nome da cidade, mas não a qual estado ela pertence. Entre os estados há 5 nomes de cidades que existem tanto no estado de MG, quanto em SP. Vamos tentar classificá-las por estado usando os dados disponíveis. São esses nomes: Itapeva, Presidente Bernardes, São Francisco, Tapiraí e Turmalina.
+
+Separaremos essas cidades com nomes duplicados como conjunto de teste e as demais serão usadas para treinamento do modelo. Selecionaremos as variáveis Prevalência, Mortalidade e os IDH's para essa modelagem, como segue:
+
+```{r}
+covid2 <- covid[,c(2,6:11)]
+duplicados=c("Itapeva","Presidente Bernardes","São Francisco","Tapiraí","Turmalina")
+teste=covid2[which(covid$Município%in%duplicados),]
+treino=covid2[which(!covid$Município%in%duplicados),]
+
+cov.l <- lapply(c("MG","SP"), function(y)
+  cov(treino[treino$Estado==y,-1],use="na.or.complete")
+)
+```
+
+Estrutura de covariâncias de MG e SP, respectivamente:
+
+```{r}
+lapply(cov.l,round,3)
+```
+
+Faremos um teste M de Box para verificar se as matrizes de covariância são significativamente diferentes ou não.
+
+```{r}
+heplots::boxM(treino[,-1],treino[,1])
+```
+
+Temos que houve rejeição da hipótese nula de igualdade das estruturas de covariância. Portanto, usaremos o método de QDA para o modelo de classificação. A matriz de confusão para o modelo usando os dados de treino é:
+
+```{r}
+modqd <- MASS::qda(Estado~.,data=treino)
+pred <- predict(modqd)
+(confusao <- table(Predicao=pred$class, Referencia=treino$Estado))
+#acuracia
+ac=sum(diag(confusao)/sum(confusao))
+#taxa de erro global
+teg=1-ac
+#especificidade
+esp=confusao[1,1]/sum(confusao[,1])
+#sensibilidade
+sens=confusao[2,2]/sum(confusao[,2])
+```
+
+E temos também as medidas de avaliação:
+
+```{r}
+#| html-table-processing: none
+library(kableExtra)
+kbl(rbind(Acurácia=ac,"Taxa de Erro Geral"=teg,Especificidade=esp,Sensibilidade=sens))%>%
+  kable_styling(full_width = F)%>%
+    column_spec(1, bold = T)
+```
+
+Assim, temos a seguinte matriz de confusão para os dados de teste:
+
+```{r}
+pred <- predict(modqd,newdata=teste)
+(confusao <- table(Predicao=pred$class, Referencia=teste$Estado))
+```
+
+Houve apenas 2 erros das 10 classificações feitas. Como o conjunto de teste é pequeno, compararemos lado a lado:
+
+```{r}
+#| html-table-processing: none
+kbl(cbind(Cidade=rep(duplicados,2),
+          Predição=as.character(pred$class), Referência=as.character(teste$Estado)))%>%
+  kable_styling(full_width = F,font_size = 12)%>%
+  column_spec(1, bold = T)
+```
+
+# Considerações Finais
+
+Entre as diferentes técnicas usadas, a que teve resultado mais surpreendente foi a de classificação: o modelo teve desempenho melhor que esperado para predizer a quais estados cada município pertencia. ACP não teve bons resultados, enquanto a análise fatorial (com rotação) teve muito melhor interpretabilidade. No geral, foi uma interessante experiência. 
